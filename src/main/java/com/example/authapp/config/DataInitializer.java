@@ -23,10 +23,10 @@ public class DataInitializer implements CommandLineRunner {
     private final JdbcTemplate jdbcTemplate;
 
     public DataInitializer(UserRepository userRepository,
-                           CodeValueRepository codeValueRepository,
-                           OrderRepository orderRepository,
-                           PasswordEncoder passwordEncoder,
-                           JdbcTemplate jdbcTemplate) {
+            CodeValueRepository codeValueRepository,
+            OrderRepository orderRepository,
+            PasswordEncoder passwordEncoder,
+            JdbcTemplate jdbcTemplate) {
         this.userRepository = userRepository;
         this.codeValueRepository = codeValueRepository;
         this.orderRepository = orderRepository;
@@ -36,7 +36,8 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Tự động nâng cấp kiểu dữ liệu cột product_name và variant để lưu link dài (TikTok, Shopee,...)
+        // Tự động nâng cấp kiểu dữ liệu cột product_name và variant để lưu link dài
+        // (TikTok, Shopee,...)
         try {
             jdbcTemplate.execute("ALTER TABLE order_details ALTER COLUMN product_name VARCHAR(65535)");
             log.info(">>> Đã nâng cấp cột order_details.product_name thành VARCHAR(65535)");
@@ -62,30 +63,5 @@ public class DataInitializer implements CommandLineRunner {
             return userRepository.save(u);
         });
 
-        // 2. Seed Code Values
-        CodeValue cv125 = codeValueRepository.findByCodeValue("125").orElseGet(() ->
-                codeValueRepository.save(new CodeValue("125")));
-        CodeValue cv1065 = codeValueRepository.findByCodeValue("1065").orElseGet(() ->
-                codeValueRepository.save(new CodeValue("1065")));
-        CodeValue cv6677 = codeValueRepository.findByCodeValue("6677").orElseGet(() ->
-                codeValueRepository.save(new CodeValue("6677")));
-        codeValueRepository.findByCodeValue("9999").orElseGet(() ->
-                codeValueRepository.save(new CodeValue("9999")));
-
-        // 3. Seed Sample Order DH001 as described in user requirement
-        if (!orderRepository.existsByOrderCode("DH001")) {
-            Order order = new Order(user, "DH001");
-            order.setStatus(OrderStatus.da_tao);
-
-            order.addDetail(new OrderDetail("OPPO A38", "4GB/128GB", 2, cv125));
-            order.addDetail(new OrderDetail("Samsung A15", "8GB/128GB", 1, cv1065));
-            order.addDetail(new OrderDetail("iPhone 15", "128GB", 3, cv6677));
-
-            orderRepository.save(order);
-            log.info(">>> Đã khởi tạo đơn hàng mẫu DH001 với 3 sản phẩm theo tài liệu!");
-        }
-
-        log.info(">>> Khởi tạo dữ liệu mẫu hoàn tất: admin / user / code_values");
-        log.info(">>> Hệ thống đã sẵn sàng với tài khoản quản trị (admin / admin123) và người dùng (user / user123). Toàn bộ dữ liệu đơn hàng và mã mẫu đã được làm sạch!");
     }
 }
