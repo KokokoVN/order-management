@@ -1,5 +1,7 @@
 @echo off
 chcp 65001 > nul
+cd /d "%~dp0"
+
 echo ===================================================
 echo     KHỞI CHẠY ỨNG DỤNG XÁC THỰC SPRING BOOT
 echo ===================================================
@@ -16,4 +18,3 @@ if exist "target\auth-app-0.0.1-SNAPSHOT.jar" (
 )
 
 pause
-
