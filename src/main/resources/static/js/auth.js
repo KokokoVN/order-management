@@ -144,7 +144,7 @@ function showToast(message, type = 'success') {
     if (!container) {
         container = document.createElement('div');
         container.id = 'toast-container';
-        container.className = 'fixed bottom-5 right-5 z-[100] flex flex-col gap-2.5 pointer-events-none max-w-sm w-full px-4';
+        container.className = 'fixed bottom-5 inset-x-4 sm:inset-x-auto sm:right-5 sm:max-w-sm z-[100] flex flex-col gap-2.5 pointer-events-none';
         document.body.appendChild(container);
     }
 

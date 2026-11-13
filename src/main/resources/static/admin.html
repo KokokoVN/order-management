@@ -2,17 +2,18 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Trang Quản Trị - Quản Lý Đơn Hàng</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/js/auth.js"></script>
     <style>
         /* Custom sleek scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .safe-pb { padding-bottom: env(safe-area-inset-bottom, 1rem); }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
@@ -20,16 +21,16 @@
     <!-- Top Navigation Bar -->
     <header class="bg-slate-800/90 border-b border-slate-700/80 sticky top-0 z-30 backdrop-blur-md shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-600/20">
-                    <i class="fa-solid fa-boxes-packing text-base"></i>
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-600/20 flex-shrink-0">
+                    <i class="fa-solid fa-boxes-packing text-sm sm:text-base"></i>
                 </div>
                 <div>
-                    <h1 class="text-base font-bold text-white leading-tight flex items-center gap-2">
-                        <span>Quản Trị Đơn Hàng</span>
-                        <span class="px-2 py-0.5 text-[10px] rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono font-medium">Admin Portal</span>
+                    <h1 class="text-sm sm:text-base font-bold text-white leading-tight flex items-center gap-1.5 sm:gap-2">
+                        <span>Quản Trị Đơn</span>
+                        <span class="px-2 py-0.5 text-[9px] sm:text-[10px] rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono font-medium">Admin</span>
                     </h1>
-                    <span class="text-xs text-slate-400 hidden sm:inline">Hệ thống phân quyền & xử lý đơn hàng</span>
+                    <span class="text-[11px] sm:text-xs text-slate-400 hidden sm:inline">Hệ thống phân quyền & đơn hàng</span>
                 </div>
             </div>
 
@@ -46,18 +47,18 @@
                 </button>
             </div>
 
-            <div class="flex items-center gap-3 sm:gap-4">
-                <div class="flex items-center gap-2.5 bg-slate-900/60 border border-slate-700/80 px-3 py-1.5 rounded-xl shadow-inner">
-                    <div class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs uppercase shadow">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="flex items-center gap-2 bg-slate-900/60 border border-slate-700/80 px-2.5 py-1.5 rounded-xl shadow-inner">
+                    <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs uppercase shadow flex-shrink-0">
                         <span id="navAvatarLetter">A</span>
                     </div>
                     <div class="text-left text-xs">
-                        <span class="font-semibold text-white block leading-tight" id="navName">admin</span>
-                        <span class="text-indigo-400 font-mono text-[10px]">ROLE_ADMIN</span>
+                        <span class="font-semibold text-white block leading-tight max-w-[100px] truncate" id="navName">admin</span>
+                        <span class="text-indigo-400 font-mono text-[9px] hidden sm:block">ROLE_ADMIN</span>
                     </div>
                 </div>
 
-                <button onclick="Auth.logout()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition active:scale-95" title="Đăng xuất khỏi hệ thống">
+                <button onclick="Auth.logout()" class="inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition active:scale-95" title="Đăng xuất">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
                     <span class="hidden sm:inline">Đăng xuất</span>
                 </button>
@@ -65,121 +66,119 @@
         </div>
     </header>
 
-    <!-- Mobile Nav Bar Tabs -->
-    <div class="md:hidden bg-slate-800 border-b border-slate-700 p-2 flex justify-around text-xs">
-        <button onclick="switchTab('orders')" id="mTabBtn-orders" class="px-3.5 py-1.5 rounded-xl font-bold text-indigo-400 bg-indigo-950/60">
-            Đơn Hàng
+    <!-- Mobile Segmented Tabs Bar (Visible only on mobile/tablet) -->
+    <div class="md:hidden bg-slate-800/95 border-b border-slate-700/80 p-2 grid grid-cols-3 gap-1.5 text-xs sticky top-16 z-20 backdrop-blur-md">
+        <button onclick="switchTab('orders')" id="mTabBtn-orders" class="py-2 rounded-xl font-bold text-center transition text-indigo-400 bg-indigo-950/60 border border-indigo-500/30 flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-list-check text-xs"></i> <span>Đơn Hàng</span>
         </button>
-        <button onclick="switchTab('codes')" id="mTabBtn-codes" class="px-3.5 py-1.5 rounded-xl font-bold text-slate-400">
-            Giá Trị Mã
+        <button onclick="switchTab('codes')" id="mTabBtn-codes" class="py-2 rounded-xl font-bold text-center transition text-slate-400 hover:text-white border border-transparent flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-barcode text-xs"></i> <span>Mã Code</span>
         </button>
-        <button onclick="switchTab('users')" id="mTabBtn-users" class="px-3.5 py-1.5 rounded-xl font-bold text-slate-400">
-            Tài Khoản
+        <button onclick="switchTab('users')" id="mTabBtn-users" class="py-2 rounded-xl font-bold text-center transition text-slate-400 hover:text-white border border-transparent flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-users text-xs"></i> <span>Tài Khoản</span>
         </button>
     </div>
 
     <!-- Main Container -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
 
         <!-- ============================================================== -->
         <!-- TAB 1: QUẢN LÝ ĐƠN HÀNG (ORDERS)                               -->
         <!-- ============================================================== -->
-        <div id="tab-orders" class="space-y-6">
+        <div id="tab-orders" class="space-y-4 sm:space-y-6">
             
             <!-- Summary Stats -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
-                    <div class="flex items-center justify-between text-slate-400 mb-2">
-                        <span class="text-xs font-semibold uppercase tracking-wider">Tổng đơn hàng</span>
-                        <i class="fa-solid fa-boxes-stacked text-indigo-400"></i>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 shadow-lg backdrop-blur-sm">
+                    <div class="flex items-center justify-between text-slate-400 mb-1 sm:mb-2">
+                        <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Tổng đơn hàng</span>
+                        <i class="fa-solid fa-boxes-stacked text-indigo-400 text-xs sm:text-sm"></i>
                     </div>
-                    <div class="text-2xl font-black text-white" id="orderStatTotal">0</div>
-                    <span class="text-[11px] text-slate-400 mt-1 block">Tất cả các đơn đã tạo</span>
+                    <div class="text-xl sm:text-2xl font-black text-white" id="orderStatTotal">0</div>
+                    <span class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 block truncate">Tất cả các đơn đã tạo</span>
                 </div>
 
-                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
-                    <div class="flex items-center justify-between text-amber-400 mb-2">
-                        <span class="text-xs font-semibold uppercase tracking-wider">Đã tạo (da_tao)</span>
-                        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 shadow-lg backdrop-blur-sm">
+                    <div class="flex items-center justify-between text-amber-400 mb-1 sm:mb-2">
+                        <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Đã tạo</span>
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
                     </div>
-                    <div class="text-2xl font-black text-amber-400" id="orderStatDaTao">0</div>
-                    <span class="text-[11px] text-slate-400 mt-1 block">Chờ xử lý gửi hàng</span>
+                    <div class="text-xl sm:text-2xl font-black text-amber-400" id="orderStatDaTao">0</div>
+                    <span class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 block truncate">Chờ xử lý gửi hàng</span>
                 </div>
 
-                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
-                    <div class="flex items-center justify-between text-sky-400 mb-2">
-                        <span class="text-xs font-semibold uppercase tracking-wider">Đã đặt (da_dat)</span>
-                        <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 shadow-lg backdrop-blur-sm">
+                    <div class="flex items-center justify-between text-sky-400 mb-1 sm:mb-2">
+                        <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Đã đặt</span>
+                        <span class="w-2 h-2 rounded-full bg-sky-400"></span>
                     </div>
-                    <div class="text-2xl font-black text-sky-400" id="orderStatDaDat">0</div>
-                    <span class="text-[11px] text-slate-400 mt-1 block">Đã gửi đi vận chuyển</span>
+                    <div class="text-xl sm:text-2xl font-black text-sky-400" id="orderStatDaDat">0</div>
+                    <span class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 block truncate">Đang vận chuyển</span>
                 </div>
 
-                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
-                    <div class="flex items-center justify-between text-emerald-400 mb-2">
-                        <span class="text-xs font-semibold uppercase tracking-wider">Đã nhận (da_nhan_hang)</span>
-                        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 shadow-lg backdrop-blur-sm">
+                    <div class="flex items-center justify-between text-emerald-400 mb-1 sm:mb-2">
+                        <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider">Đã nhận hàng</span>
+                        <i class="fa-solid fa-circle-check text-emerald-400 text-xs sm:text-sm"></i>
                     </div>
-                    <div class="text-2xl font-black text-emerald-400" id="orderStatDaNhan">0</div>
-                    <span class="text-[11px] text-slate-400 mt-1 block">Đơn hàng hoàn tất</span>
+                    <div class="text-xl sm:text-2xl font-black text-emerald-400" id="orderStatDaNhan">0</div>
+                    <span class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 block truncate">Đã nhận hoàn tất</span>
                 </div>
             </div>
 
-            <!-- Orders Table Card with Filters & Search -->
-            <div class="bg-slate-800/80 border border-slate-700/80 rounded-3xl shadow-xl overflow-hidden backdrop-blur-sm">
+            <!-- Orders Container (Cards on Mobile, Table on Desktop) -->
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden backdrop-blur-sm">
                 
                 <!-- Table Header Toolbar -->
-                <div class="p-5 border-b border-slate-700/70 space-y-4">
+                <div class="p-4 sm:p-5 border-b border-slate-700/70 space-y-3 sm:space-y-4">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
-                                <i class="fa-solid fa-list-check text-sm"></i>
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold flex-shrink-0">
+                                <i class="fa-solid fa-list-check text-xs sm:text-sm"></i>
                             </div>
-                            <div>
-                                <h3 class="text-base font-bold text-white flex items-center gap-2">
-                                    <span>Danh Sách Toàn Bộ Đơn Hàng</span>
-                                    <span id="orderCountBadge" class="px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-300 text-xs font-semibold">0</span>
-                                </h3>
-                            </div>
+                            <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                                <span>Toàn Bộ Đơn Hàng</span>
+                                <span id="orderCountBadge" class="px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-300 text-xs font-semibold">0</span>
+                            </h3>
                         </div>
 
                         <!-- Search & Refresh -->
-                        <div class="flex items-center gap-2.5">
-                            <div class="relative w-full sm:w-64">
+                        <div class="flex items-center gap-2 w-full sm:w-auto">
+                            <div class="relative flex-1 sm:w-64">
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none text-xs">
                                     <i class="fa-solid fa-magnifying-glass"></i>
                                 </span>
-                                <input id="orderSearchInput" type="text" placeholder="Tìm theo mã đơn, người tạo, link..."
+                                <input id="orderSearchInput" type="text" placeholder="Tìm mã đơn, người tạo, link..."
                                        class="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
                             </div>
-                            <button onclick="loadOrders()" class="p-2.5 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-slate-300 transition" title="Làm mới">
+                            <button onclick="loadOrders()" class="p-2 sm:p-2.5 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-slate-300 transition flex-shrink-0" title="Làm mới">
                                 <i id="adminRefreshIcon" class="fa-solid fa-arrows-rotate text-xs"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Status Filter Tabs -->
-                    <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-700/50">
-                        <button onclick="setAdminStatusFilter('all')" id="adminFilter-all" class="admin-filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition bg-indigo-600 text-white shadow">
+                    <!-- Status Filter Tabs (Horizontal scrolling on small devices) -->
+                    <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 pt-1 border-t border-slate-700/50 no-scrollbar">
+                        <button onclick="setAdminStatusFilter('all')" id="adminFilter-all" class="admin-filter-pill whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold transition bg-indigo-600 text-white shadow">
                             Tất cả (<span id="adminFilterCountAll">0</span>)
                         </button>
-                        <button onclick="setAdminStatusFilter('da_tao')" id="adminFilter-da_tao" class="admin-filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white bg-slate-900/60 border border-slate-700/60">
-                            <span class="w-2 h-2 rounded-full bg-amber-400 inline-block mr-1"></span>
+                        <button onclick="setAdminStatusFilter('da_tao')" id="adminFilter-da_tao" class="admin-filter-pill whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white bg-slate-900/60 border border-slate-700/60">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block mr-1"></span>
                             Đã tạo (<span id="adminFilterCountDaTao">0</span>)
                         </button>
-                        <button onclick="setAdminStatusFilter('da_dat')" id="adminFilter-da_dat" class="admin-filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white bg-slate-900/60 border border-slate-700/60">
-                            <span class="w-2 h-2 rounded-full bg-sky-400 inline-block mr-1"></span>
+                        <button onclick="setAdminStatusFilter('da_dat')" id="adminFilter-da_dat" class="admin-filter-pill whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white bg-slate-900/60 border border-slate-700/60">
+                            <span class="w-1.5 h-1.5 rounded-full bg-sky-400 inline-block mr-1"></span>
                             Đã đặt (<span id="adminFilterCountDaDat">0</span>)
                         </button>
-                        <button onclick="setAdminStatusFilter('da_nhan_hang')" id="adminFilter-da_nhan_hang" class="admin-filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white bg-slate-900/60 border border-slate-700/60">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-1"></span>
-                            Đã nhận hàng (<span id="adminFilterCountDaNhan">0</span>)
+                        <button onclick="setAdminStatusFilter('da_nhan_hang')" id="adminFilter-da_nhan_hang" class="admin-filter-pill whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white bg-slate-900/60 border border-slate-700/60">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-1"></span>
+                            Đã nhận (<span id="adminFilterCountDaNhan">0</span>)
                         </button>
                     </div>
                 </div>
 
-                <!-- Orders Table -->
-                <div class="overflow-x-auto">
+                <!-- VIEW 1: DESKTOP ORDERS TABLE (Hidden on mobile) -->
+                <div class="hidden md:block overflow-x-auto">
                     <table class="w-full text-left text-sm text-slate-300">
                         <thead class="bg-slate-900/80 text-slate-400 text-xs uppercase font-semibold border-b border-slate-700/60">
                             <tr>
@@ -198,6 +197,11 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- VIEW 2: MOBILE ORDERS CARD LIST (Visible only on mobile/tablet) -->
+                <div id="ordersCardsMobile" class="md:hidden divide-y divide-slate-700/60">
+                    <div class="p-8 text-center text-slate-500">Đang tải đơn hàng...</div>
+                </div>
             </div>
 
         </div>
@@ -205,29 +209,31 @@
         <!-- ============================================================== -->
         <!-- TAB 2: QUẢN LÝ GIÁ TRỊ MÃ (CODE_VALUES)                       -->
         <!-- ============================================================== -->
-        <div id="tab-codes" class="hidden space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-800/80 border border-slate-700/80 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
+        <div id="tab-codes" class="hidden space-y-4 sm:space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 bg-slate-800/80 border border-slate-700/80 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl backdrop-blur-sm">
                 <div>
-                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <h3 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-barcode text-purple-400"></i>
-                        <span>Danh Sách Giá Trị Mã (code_values)</span>
+                        <span>Danh Sách Giá Trị Mã</span>
                     </h3>
                     <p class="text-xs text-slate-400 mt-1">
-                        Giá trị mã dùng để gán cho toàn bộ đơn hàng (ví dụ: 40, 50, 100, 125, 1065...).
+                        Giá trị mã dùng để gán cho toàn bộ đơn hàng (ví dụ: 40, 50, 100...).
                     </p>
                 </div>
-                <button onclick="openAddCodeModal()" class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition transform hover:-translate-y-0.5 active:translate-y-0">
+                <button onclick="openAddCodeModal()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl sm:rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition">
                     <i class="fa-solid fa-plus"></i>
                     <span>Thêm Giá Trị Mã Mới</span>
                 </button>
             </div>
 
-            <div class="bg-slate-800/80 border border-slate-700/80 rounded-3xl shadow-xl overflow-hidden backdrop-blur-sm">
-                <div class="p-5 border-b border-slate-700/70 flex items-center justify-between">
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden backdrop-blur-sm">
+                <div class="p-4 sm:p-5 border-b border-slate-700/70 flex items-center justify-between">
                     <h4 class="text-sm font-bold text-white">Các Mã Đang Có Trong Hệ Thống</h4>
                     <span id="codeCountBadge" class="px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-300 text-xs font-semibold">0</span>
                 </div>
-                <div class="overflow-x-auto">
+                
+                <!-- Desktop Table -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-left text-sm text-slate-300">
                         <thead class="bg-slate-900/80 text-slate-400 text-xs uppercase font-semibold border-b border-slate-700/60">
                             <tr>
@@ -241,16 +247,21 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Mobile Card List -->
+                <div id="codesCardsMobile" class="sm:hidden divide-y divide-slate-700/60">
+                    <!-- Populated dynamically -->
+                </div>
             </div>
         </div>
 
         <!-- ============================================================== -->
         <!-- TAB 3: QUẢN LÝ TÀI KHOẢN (USERS - CHỈ TẠO Ở ADMIN)             -->
         <!-- ============================================================== -->
-        <div id="tab-users" class="hidden space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-slate-800/80 border border-slate-700/80 rounded-3xl p-6 shadow-xl backdrop-blur-sm">
+        <div id="tab-users" class="hidden space-y-4 sm:space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 bg-slate-800/80 border border-slate-700/80 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl backdrop-blur-sm">
                 <div>
-                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <h3 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-users text-emerald-400"></i>
                         <span>Quản Lý Người Dùng & Phân Quyền</span>
                     </h3>
@@ -258,18 +269,20 @@
                         Hệ thống chỉ cho phép tạo tài khoản tại đây. Người dùng không thể tự đăng ký bên ngoài.
                     </p>
                 </div>
-                <button onclick="openCreateUserModal()" class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition transform hover:-translate-y-0.5 active:translate-y-0">
+                <button onclick="openCreateUserModal()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl sm:rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition">
                     <i class="fa-solid fa-user-plus"></i>
                     <span>Tạo Tài Khoản Mới</span>
                 </button>
             </div>
 
-            <div class="bg-slate-800/80 border border-slate-700/80 rounded-3xl shadow-xl overflow-hidden backdrop-blur-sm">
-                <div class="p-5 border-b border-slate-700/70 flex items-center justify-between">
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl sm:rounded-3xl shadow-xl overflow-hidden backdrop-blur-sm">
+                <div class="p-4 sm:p-5 border-b border-slate-700/70 flex items-center justify-between">
                     <h4 class="text-sm font-bold text-white">Danh Sách Người Dùng Trong Hệ Thống</h4>
                     <span id="userCountBadge" class="px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-300 text-xs font-semibold">0</span>
                 </div>
-                <div class="overflow-x-auto">
+
+                <!-- Desktop Table -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-left text-sm text-slate-300">
                         <thead class="bg-slate-900/80 text-slate-400 text-xs uppercase font-semibold border-b border-slate-700/60">
                             <tr>
@@ -284,46 +297,52 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Mobile Card List -->
+                <div id="usersCardsMobile" class="sm:hidden divide-y divide-slate-700/60">
+                    <!-- Populated dynamically -->
+                </div>
             </div>
         </div>
 
     </main>
 
     <!-- ============================================================== -->
-    <!-- MODAL 1: XEM CHI TIẾT ĐƠN HÀNG                                 -->
+    <!-- MODAL 1: XEM CHI TIẾT ĐƠN HÀNG (Responsive Modal)              -->
     <!-- ============================================================== -->
-    <div id="orderDetailModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800/90">
+    <div id="orderDetailModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-0 sm:p-4 overflow-y-auto">
+        <div class="bg-slate-800 border-0 sm:border sm:border-slate-700 rounded-none sm:rounded-3xl shadow-2xl max-w-3xl w-full min-h-screen sm:min-h-0 sm:max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800/95 sticky top-0 z-10">
                 <div>
-                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                         <span id="modalOrderCodeTitle">Chi Tiết Đơn Hàng</span>
                         <button type="button" onclick="copyCurrentAdminOrderCode()" title="Sao chép mã đơn" class="p-1 text-slate-400 hover:text-indigo-400 transition">
                             <i class="fa-regular fa-copy"></i>
                         </button>
                     </h3>
-                    <span class="text-xs text-slate-400" id="modalOrderSubtitle"></span>
+                    <span class="text-[11px] sm:text-xs text-slate-400" id="modalOrderSubtitle"></span>
                 </div>
                 <button onclick="closeModal('orderDetailModal')" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-700/60 transition">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
             
-            <div class="p-6 space-y-4 overflow-y-auto flex-1">
+            <div class="p-4 sm:p-6 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
                 <!-- Action bar in details -->
-                <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <span class="text-slate-400 font-semibold uppercase tracking-wider">Danh sách link sản phẩm</span>
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                    <span class="text-slate-400 font-semibold uppercase tracking-wider text-[11px]">Danh sách link sản phẩm</span>
                     <div class="flex items-center gap-2">
-                        <button type="button" onclick="openAllLinksInTabs()" class="px-3 py-1.5 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-indigo-300 border border-indigo-500/20 font-semibold transition flex items-center gap-1.5">
+                        <button type="button" onclick="openAllLinksInTabs()" class="flex-1 sm:flex-none px-3 py-1.5 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-indigo-300 border border-indigo-500/20 font-semibold transition flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-arrow-up-right-from-square"></i> Mở tất cả link
                         </button>
-                        <button type="button" onclick="copyAllAdminOrderLinks()" class="px-3 py-1.5 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-sky-300 border border-sky-500/20 font-semibold transition flex items-center gap-1.5">
-                            <i class="fa-regular fa-copy"></i> Sao chép tất cả link
+                        <button type="button" onclick="copyAllAdminOrderLinks()" class="flex-1 sm:flex-none px-3 py-1.5 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-sky-300 border border-sky-500/20 font-semibold transition flex items-center justify-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i> Sao chép tất cả
                         </button>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto border border-slate-700 rounded-2xl">
+                <!-- Desktop Table View -->
+                <div class="hidden sm:block overflow-x-auto border border-slate-700 rounded-2xl">
                     <table class="w-full text-left text-xs text-slate-300">
                         <thead class="bg-slate-900/80 text-slate-400 uppercase font-semibold">
                             <tr>
@@ -331,15 +350,20 @@
                                 <th class="px-4 py-3 w-36">Phân Loại</th>
                                 <th class="px-4 py-3 w-20 text-center">Số Lượng</th>
                                 <th class="px-4 py-3 w-28 text-center">Giá Trị Mã</th>
-                                <th class="px-4 py-3 w-16 text-center">Thao tác</th>
+                                <th class="px-4 py-3 w-16 text-center">Mở</th>
                             </tr>
                         </thead>
                         <tbody id="modalOrderItemsBody" class="divide-y divide-slate-700/50 bg-slate-900/40"></tbody>
                     </table>
                 </div>
 
+                <!-- Mobile Card List -->
+                <div id="modalOrderItemsMobile" class="sm:hidden space-y-2.5">
+                    <!-- Populated dynamically -->
+                </div>
+
                 <div class="pt-3 border-t border-slate-700 flex justify-end">
-                    <button onclick="closeModal('orderDetailModal')" class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition">
+                    <button onclick="closeModal('orderDetailModal')" class="w-full sm:w-auto px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition">
                         Đóng
                     </button>
                 </div>
@@ -348,12 +372,12 @@
     </div>
 
     <!-- ============================================================== -->
-    <!-- MODAL 2: CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG                          -->
+    <!-- MODAL 2: CẬP NHẬT TRẠNG THÁI ĐƠN HÀNG (Responsive Modal)       -->
     <!-- ============================================================== -->
     <div id="statusModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800/90">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div class="px-5 sm:px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800/90">
+                <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-pen-to-square text-indigo-400"></i>
                     <span>Cập Nhật Trạng Thái Đơn Hàng</span>
                 </h3>
@@ -361,18 +385,18 @@
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <form id="statusForm" class="p-6 space-y-4">
+            <form id="statusForm" class="p-5 sm:p-6 space-y-4">
                 <input type="hidden" id="statusOrderId">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Mã đơn hàng</label>
                     <input id="statusOrderCodeDisplay" type="text" readonly disabled
-                           class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-mono text-indigo-400 font-bold">
+                           class="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs font-mono text-indigo-400 font-bold">
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">Trạng thái mới</label>
                     <select id="selectStatus" required onchange="handleStatusChange(this.value)"
-                            class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                            class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs sm:text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
                         <option value="da_tao">Đã tạo (da_tao)</option>
                         <option value="da_dat">Đã đặt (da_dat) - Đang gửi</option>
                         <option value="da_nhan_hang">Đã nhận hàng (da_nhan_hang) - Hoàn tất</option>
@@ -389,15 +413,15 @@
                         </button>
                     </div>
                     <input id="inputSentAt" type="datetime-local"
-                           class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
-                    <span class="text-[11px] text-slate-500 mt-1 block">Tự động điền ngày giờ hiện tại khi chuyển sang 'Đã đặt' nếu để trống.</span>
+                           class="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                    <span class="text-[10px] sm:text-[11px] text-slate-500 mt-1 block">Tự động điền ngày giờ hiện tại khi chuyển sang 'Đã đặt' nếu để trống.</span>
                 </div>
 
                 <div class="pt-3 border-t border-slate-700 flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('statusModal')" class="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition">
+                    <button type="button" onclick="closeModal('statusModal')" class="flex-1 sm:flex-none px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition">
                         Hủy
                     </button>
-                    <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/30 transition">
+                    <button type="submit" class="flex-1 sm:flex-none px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/30 transition">
                         Lưu Cập Nhật
                     </button>
                 </div>
@@ -409,9 +433,9 @@
     <!-- MODAL 3: THÊM GIÁ TRỊ MÃ (CODE_VALUES)                         -->
     <!-- ============================================================== -->
     <div id="addCodeModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800/90">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
+            <div class="px-5 sm:px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800/90">
+                <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-barcode text-purple-400"></i>
                     <span>Thêm Giá Trị Mã</span>
                 </h3>
@@ -419,7 +443,7 @@
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <form id="addCodeForm" class="p-6 space-y-4">
+            <form id="addCodeForm" class="p-5 sm:p-6 space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
                         Nội dung mã (ví dụ: 40, 50, 100...) <span class="text-rose-400">*</span>
@@ -428,10 +452,10 @@
                            class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
                 </div>
                 <div class="pt-3 border-t border-slate-700 flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('addCodeModal')" class="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition">
+                    <button type="button" onclick="closeModal('addCodeModal')" class="flex-1 sm:flex-none px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition">
                         Hủy
                     </button>
-                    <button type="submit" class="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-600/30 transition">
+                    <button type="submit" class="flex-1 sm:flex-none px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-purple-600/30 transition">
                         Thêm Mã
                     </button>
                 </div>
@@ -443,9 +467,9 @@
     <!-- MODAL 4: TẠO TÀI KHOẢN MỚI (CHỈ TẠO Ở ADMIN)                    -->
     <!-- ============================================================== -->
     <div id="createUserModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800/90">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden">
+            <div class="px-5 sm:px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800/90">
+                <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                     <i class="fa-solid fa-user-plus text-emerald-400"></i>
                     <span>Tạo Tài Khoản Mới</span>
                 </h3>
@@ -453,7 +477,7 @@
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <form id="createUserForm" class="p-6 space-y-4">
+            <form id="createUserForm" class="p-5 sm:p-6 space-y-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
                         Tên đăng nhập (Username) <span class="text-rose-400">*</span>
@@ -482,10 +506,10 @@
                 </div>
 
                 <div class="pt-3 border-t border-slate-700 flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('createUserModal')" class="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition">
+                    <button type="button" onclick="closeModal('createUserModal')" class="flex-1 sm:flex-none px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition">
                         Hủy
                     </button>
-                    <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 transition">
+                    <button type="submit" class="flex-1 sm:flex-none px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 transition">
                         Tạo Tài Khoản
                     </button>
                 </div>
@@ -520,7 +544,7 @@
                 
                 const mBtn = document.getElementById(`mTabBtn-${t}`);
                 if (mBtn) {
-                    mBtn.className = 'px-3.5 py-1.5 rounded-xl font-bold text-slate-400';
+                    mBtn.className = 'py-2 rounded-xl font-bold text-center transition text-slate-400 hover:text-white border border-transparent flex items-center justify-center gap-1.5';
                 }
             });
 
@@ -533,7 +557,7 @@
 
             const activeMBtn = document.getElementById(`mTabBtn-${tab}`);
             if (activeMBtn) {
-                activeMBtn.className = 'px-3.5 py-1.5 rounded-xl font-bold text-indigo-400 bg-indigo-950/60';
+                activeMBtn.className = 'py-2 rounded-xl font-bold text-center transition text-indigo-400 bg-indigo-950/60 border border-indigo-500/30 flex items-center justify-center gap-1.5';
             }
 
             if (tab === 'orders') loadOrders();
@@ -584,12 +608,12 @@
             currentAdminFilterStatus = status;
 
             document.querySelectorAll('.admin-filter-pill').forEach(btn => {
-                btn.className = 'admin-filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white bg-slate-900/60 border border-slate-700/60';
+                btn.className = 'admin-filter-pill whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white bg-slate-900/60 border border-slate-700/60';
             });
 
             const activeBtn = document.getElementById(`adminFilter-${status}`);
             if (activeBtn) {
-                activeBtn.className = 'admin-filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition bg-indigo-600 text-white shadow';
+                activeBtn.className = 'admin-filter-pill whitespace-nowrap px-3 py-1.5 rounded-xl text-xs font-semibold transition bg-indigo-600 text-white shadow';
             }
 
             applyAdminFilterAndRender();
@@ -625,15 +649,17 @@
         function renderOrders(orders) {
             document.getElementById('orderCountBadge').textContent = orders.length;
             const tbody = document.getElementById('ordersTableBody');
+            const mobileContainer = document.getElementById('ordersCardsMobile');
+
             if (orders.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="px-6 py-12 text-center text-slate-500">
-                            <i class="fa-solid fa-inbox text-3xl mb-2 text-slate-600 block"></i>
-                            <span>Không tìm thấy đơn hàng nào phù hợp.</span>
-                        </td>
-                    </tr>
+                const emptyHtml = `
+                    <div class="px-6 py-12 text-center text-slate-500">
+                        <i class="fa-solid fa-inbox text-3xl mb-2 text-slate-600 block"></i>
+                        <span>Không tìm thấy đơn hàng nào phù hợp.</span>
+                    </div>
                 `;
+                tbody.innerHTML = `<tr><td colspan="8">${emptyHtml}</td></tr>`;
+                mobileContainer.innerHTML = emptyHtml;
                 return;
             }
 
@@ -649,6 +675,7 @@
                 da_nhan_hang: '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>'
             };
 
+            // 1. Desktop Table
             tbody.innerHTML = orders.map(o => {
                 const orderCodeVal = (o.items && o.items.length > 0 && o.items[0].codeValue) 
                     ? o.items[0].codeValue 
@@ -700,6 +727,59 @@
                 </tr>
                 `;
             }).join('');
+
+            // 2. Mobile Cards
+            mobileContainer.innerHTML = orders.map(o => {
+                const orderCodeVal = (o.items && o.items.length > 0 && o.items[0].codeValue) 
+                    ? o.items[0].codeValue 
+                    : '--';
+
+                return `
+                <div class="p-4 space-y-3 bg-slate-800/40 hover:bg-slate-800/80 transition">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-mono font-bold text-indigo-400 text-sm">${escapeHtml(o.orderCode)}</span>
+                            <button onclick="copyToClipboard('${escapeHtml(o.orderCode)}', 'Đã sao chép mã ${escapeHtml(o.orderCode)}!')" class="p-1 text-slate-400 hover:text-white">
+                                <i class="fa-regular fa-copy text-xs"></i>
+                            </button>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${statusColors[o.status] || ''}">
+                            ${statusDots[o.status] || ''}
+                            ${escapeHtml(o.statusLabel || o.status)}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs text-slate-300 bg-slate-900/50 p-2.5 rounded-xl border border-slate-700/60">
+                        <div>
+                            <span class="text-slate-500 text-[10px] block uppercase font-semibold">Người tạo</span>
+                            <span class="font-semibold text-white flex items-center gap-1">
+                                <i class="fa-solid fa-user text-[10px] text-indigo-400"></i> ${escapeHtml(o.userName)}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-slate-500 text-[10px] block uppercase font-semibold">Giá trị mã</span>
+                            <span class="font-mono font-bold text-purple-300">${escapeHtml(orderCodeVal)}</span>
+                        </div>
+                        <div class="col-span-2 flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-700/50">
+                            <span>SL: <strong>${o.itemCount} link</strong> (${o.totalQuantity} chiếc)</span>
+                            <span>Tạo: ${formatDateTime(o.createdAt)}</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1.5 pt-1">
+                        <button onclick="viewOrderDetail(${o.id})" class="py-2 px-1 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 text-xs font-semibold text-center transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-eye text-[11px]"></i> <span>Chi tiết</span>
+                        </button>
+                        <button onclick="openStatusModal(${o.id}, '${escapeHtml(o.orderCode)}', '${o.status}', '${o.sentAt || ''}')" class="py-2 px-1 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-semibold text-center transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-pen-to-square text-[11px]"></i> <span>Đổi TT</span>
+                        </button>
+                        <button onclick="deleteOrder(${o.id}, '${escapeHtml(o.orderCode)}')" class="py-2 px-1 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold text-center transition flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-trash-can text-[11px]"></i> <span>Xóa</span>
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('');
         }
 
         async function viewOrderDetail(id) {
@@ -709,9 +789,10 @@
                 if (result.success) {
                     currentViewingAdminOrder = result.data;
                     const order = currentViewingAdminOrder;
-                    document.getElementById('modalOrderCodeTitle').textContent = `Chi tiết đơn hàng: ${order.orderCode}`;
-                    document.getElementById('modalOrderSubtitle').textContent = `Người tạo: ${order.userName} • Trạng thái: ${order.statusLabel}`;
+                    document.getElementById('modalOrderCodeTitle').textContent = `Đơn: ${order.orderCode}`;
+                    document.getElementById('modalOrderSubtitle').textContent = `Người tạo: ${order.userName} • ${order.statusLabel}`;
 
+                    // Desktop Table
                     const tbody = document.getElementById('modalOrderItemsBody');
                     tbody.innerHTML = order.items.map(it => `
                         <tr class="hover:bg-slate-900/60 transition">
@@ -740,12 +821,39 @@
                             </td>
                             <td class="px-4 py-3 text-center">
                                 ${it.productName.startsWith('http') ? `
-                                    <a href="${escapeHtml(it.productName)}" target="_blank" rel="noopener" title="Mở link xem thử" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-400 border border-slate-700 inline-block transition">
+                                    <a href="${escapeHtml(it.productName)}" target="_blank" rel="noopener" title="Mở link" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-400 border border-slate-700 inline-block transition">
                                         <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                                     </a>
                                 ` : '--'}
                             </td>
                         </tr>
+                    `).join('');
+
+                    // Mobile Cards
+                    const mobileContainer = document.getElementById('modalOrderItemsMobile');
+                    mobileContainer.innerHTML = order.items.map((it, idx) => `
+                        <div class="bg-slate-900/60 border border-slate-700 rounded-xl p-3 space-y-2">
+                            <div class="flex items-start justify-between gap-2">
+                                <span class="text-[11px] font-mono text-slate-500 font-bold">#${idx + 1}</span>
+                                <div class="flex items-center gap-1.5">
+                                    <button onclick="copyToClipboard('${escapeHtml(it.productName)}', 'Đã sao chép link!')" class="p-1 text-slate-400 hover:text-white text-xs">
+                                        <i class="fa-regular fa-copy"></i> Copy
+                                    </button>
+                                    ${it.productName.startsWith('http') ? `
+                                        <a href="${escapeHtml(it.productName)}" target="_blank" rel="noopener" class="p-1 px-2 rounded bg-indigo-500/10 text-indigo-400 text-xs font-semibold flex items-center gap-1">
+                                            <span>Mở link</span> <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                        </a>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            <div class="text-xs text-slate-200 break-all font-mono">
+                                ${escapeHtml(it.productName)}
+                            </div>
+                            <div class="flex items-center justify-between text-xs pt-1.5 border-t border-slate-800">
+                                <span class="text-slate-400">Phân loại: <strong class="text-white">${it.variant ? escapeHtml(it.variant) : 'Mặc định'}</strong></span>
+                                <span class="font-bold text-sky-400">SL: ${it.quantity}</span>
+                            </div>
+                        </div>
                     `).join('');
 
                     openModal('orderDetailModal');
@@ -883,18 +991,21 @@
         function renderCodes(codes) {
             document.getElementById('codeCountBadge').textContent = codes.length;
             const tbody = document.getElementById('codesTableBody');
+            const mobileContainer = document.getElementById('codesCardsMobile');
+
             if (codes.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="3" class="px-6 py-10 text-center text-slate-500">
-                            <i class="fa-solid fa-barcode text-3xl mb-2 text-slate-600 block"></i>
-                            <span>Chưa có giá trị mã nào. Hãy bấm "Thêm Giá Trị Mã Mới" để tạo mã!</span>
-                        </td>
-                    </tr>
+                const emptyHtml = `
+                    <div class="px-6 py-10 text-center text-slate-500">
+                        <i class="fa-solid fa-barcode text-3xl mb-2 text-slate-600 block"></i>
+                        <span>Chưa có giá trị mã nào. Hãy bấm "Thêm Giá Trị Mã Mới" để tạo!</span>
+                    </div>
                 `;
+                tbody.innerHTML = `<tr><td colspan="3">${emptyHtml}</td></tr>`;
+                mobileContainer.innerHTML = emptyHtml;
                 return;
             }
 
+            // Desktop Table
             tbody.innerHTML = codes.map(c => `
                 <tr class="hover:bg-slate-800/60 transition">
                     <td class="px-6 py-3.5 font-mono text-xs text-slate-400">#${c.id}</td>
@@ -909,6 +1020,21 @@
                         </button>
                     </td>
                 </tr>
+            `).join('');
+
+            // Mobile Cards
+            mobileContainer.innerHTML = codes.map(c => `
+                <div class="p-3.5 flex items-center justify-between bg-slate-800/40 hover:bg-slate-800/80 transition">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-mono text-slate-500 font-semibold">#${c.id}</span>
+                        <span class="px-3 py-1.5 rounded-xl bg-purple-500/20 text-purple-300 font-mono text-sm font-bold border border-purple-500/30">
+                            ${escapeHtml(c.codeValue)}
+                        </span>
+                    </div>
+                    <button onclick="deleteCode(${c.id}, '${escapeHtml(c.codeValue)}')" class="p-2 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can"></i> <span>Xóa</span>
+                    </button>
+                </div>
             `).join('');
         }
 
@@ -946,7 +1072,7 @@
         async function deleteCode(id, val) {
             const confirmed = await ConfirmModal.show({
                 title: 'Xóa giá trị mã',
-                message: `Bạn có chắc muốn xóa giá trị mã '${val}'? Lưu ý: Nếu mã này đang được sử dụng trong bất kỳ đơn hàng nào, hệ thống sẽ từ chối xóa để bảo vệ dữ liệu.`,
+                message: `Bạn có chắc muốn xóa giá trị mã '${val}'? Nếu mã đang được sử dụng trong đơn hàng, hệ thống sẽ từ chối xóa để bảo vệ dữ liệu.`,
                 confirmText: 'Xóa mã',
                 cancelText: 'Hủy',
                 isDanger: true
@@ -987,6 +1113,9 @@
         function renderUsers(users) {
             document.getElementById('userCountBadge').textContent = users.length;
             const tbody = document.getElementById('usersTableBody');
+            const mobileContainer = document.getElementById('usersCardsMobile');
+
+            // Desktop Table
             tbody.innerHTML = users.map(u => {
                 const isCurrent = u.name.toLowerCase() === userNameDisplay.toLowerCase();
                 const roleBadge = (u.role === 'admin' || u.role === 'ROLE_ADMIN')
@@ -1000,7 +1129,7 @@
                             <span class="inline-flex items-center gap-2">
                                 <i class="fa-solid fa-circle-user text-slate-500 text-sm"></i>
                                 ${escapeHtml(u.name)}
-                                ${isCurrent ? '<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-normal border border-amber-500/30">Tài khoản của bạn</span>' : ''}
+                                ${isCurrent ? '<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-normal border border-amber-500/30">Bạn</span>' : ''}
                             </span>
                         </td>
                         <td class="px-6 py-3.5">${roleBadge}</td>
@@ -1012,6 +1141,36 @@
                             ` : `<span class="text-xs text-slate-500 italic">Đang đăng nhập</span>`}
                         </td>
                     </tr>
+                `;
+            }).join('');
+
+            // Mobile Cards
+            mobileContainer.innerHTML = users.map(u => {
+                const isCurrent = u.name.toLowerCase() === userNameDisplay.toLowerCase();
+                const roleBadge = (u.role === 'admin' || u.role === 'ROLE_ADMIN')
+                    ? '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">admin</span>'
+                    : '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/20">user</span>';
+
+                return `
+                <div class="p-3.5 flex items-center justify-between bg-slate-800/40 hover:bg-slate-800/80 transition">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-white text-sm">${escapeHtml(u.name)}</span>
+                            ${isCurrent ? '<span class="px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[9px] font-medium border border-amber-500/30">Bạn</span>' : ''}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-mono text-slate-500">#${u.id}</span>
+                            ${roleBadge}
+                        </div>
+                    </div>
+                    <div>
+                        ${!isCurrent ? `
+                            <button onclick="deleteUserAccount(${u.id}, '${escapeHtml(u.name)}')" class="p-2 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition flex items-center gap-1">
+                                <i class="fa-solid fa-trash-can"></i> <span>Xóa</span>
+                            </button>
+                        ` : `<span class="text-xs text-slate-500 italic">Hiện hành</span>`}
+                    </div>
+                </div>
                 `;
             }).join('');
         }
@@ -1075,6 +1234,7 @@
             if (!el) return;
             el.classList.remove('hidden');
             el.classList.add('flex');
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal(id) {
@@ -1082,6 +1242,7 @@
             if (!el) return;
             el.classList.add('hidden');
             el.classList.remove('flex');
+            document.body.style.overflow = '';
         }
 
         function escapeHtml(text) {

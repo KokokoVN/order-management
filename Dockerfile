@@ -25,3 +25,4 @@ ENV PORT=8080
 
 # Keep memory within free tier limits (512MB)
 ENTRYPOINT ["java", "-Xmx384m", "-jar", "app.jar"]
+
