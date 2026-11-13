@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Đăng Nhập</title>
+    <script src="/js/auth.js"></script>
+</head>
+<body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
+    <div class="text-center">
+        <p class="text-gray-400">Đang chuyển hướng...</p>
+    </div>
+    <script>
+        if (Auth.isAuthenticated()) {
+            if (Auth.isAdmin()) {
+                window.location.replace('/admin.html');
+            } else {
+                window.location.replace('/user.html');
+            }
+        } else {
+            window.location.replace('/login.html');
+        }
+    </script>
+</body>
+</html>
+

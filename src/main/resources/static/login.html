@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập - Hệ Thống Quản Lý Đơn Hàng</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/js/auth.js"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 min-h-screen flex items-center justify-center p-4 font-sans text-slate-100">
+
+    <div class="w-full max-w-md">
+        <!-- Main Login Card -->
+        <div class="bg-slate-800/90 backdrop-blur-xl border border-slate-700/80 rounded-2xl shadow-2xl p-8 transition-all">
+            
+            <!-- Logo & Header -->
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 mb-4 shadow-inner">
+                    <i class="fa-solid fa-box-open text-2xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight text-white">Quản Lý Đơn Hàng</h1>
+                <p class="text-slate-400 text-xs mt-1">Đăng nhập tài khoản nội bộ (Admin / User)</p>
+            </div>
+
+            <!-- Notice: Registration Only in Admin -->
+            <div class="mb-6 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-start gap-2.5">
+                <i class="fa-solid fa-circle-info text-amber-400 mt-0.5 text-sm flex-shrink-0"></i>
+                <div>
+                    <span class="font-semibold">Lưu ý:</span> Hệ thống <strong>chỉ hỗ trợ đăng nhập</strong>. Tài khoản mới được cấp độc quyền bởi Quản trị viên tại trang Admin.
+                </div>
+            </div>
+
+            <!-- Error / Alert Box -->
+            <div id="alertBox" class="hidden mb-5 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2.5">
+                <i class="fa-solid fa-triangle-exclamation text-rose-400 flex-shrink-0"></i>
+                <span id="alertMessage" class="flex-1 font-medium"></span>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="space-y-4">
+                <!-- Username -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5" for="nameInput">
+                        Tên đăng nhập
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input id="nameInput" type="text" required autocomplete="username"
+                               placeholder="Nhập tên đăng nhập (ví dụ: admin, user)..."
+                               class="w-full pl-10 pr-4 py-2.5 bg-slate-900/70 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5" for="passwordInput">
+                        Mật khẩu
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input id="passwordInput" type="password" required autocomplete="current-password"
+                               placeholder="••••••••"
+                               class="w-full pl-10 pr-10 py-2.5 bg-slate-900/70 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                        <button type="button" id="togglePasswordBtn" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-200 focus:outline-none">
+                            <i id="eyeIcon" class="fa-regular fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn"
+                        class="w-full mt-2 py-3 px-4 bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white font-medium text-sm rounded-xl shadow-lg shadow-indigo-600/30 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition flex items-center justify-center gap-2">
+                    <span id="btnText">Đăng Nhập</span>
+                    <i id="btnSpinner" class="fa-solid fa-circle-notch fa-spin hidden"></i>
+                </button>
+            </form>
+
+        </div>
+
+        <p class="text-center text-xs text-slate-500 mt-6">
+            Hệ thống Quản lý đơn hàng &bull; Spring Boot &bull; MySQL / H2 &bull; Tailwind CSS
+        </p>
+    </div>
+
+    <script>
+        // Check if already authenticated
+        if (Auth.isAuthenticated()) {
+            if (Auth.isAdmin()) {
+                window.location.replace('/admin.html');
+            } else {
+                window.location.replace('/user.html');
+            }
+        }
+
+        // Toggle password visibility
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        const passwordInput = document.getElementById('passwordInput');
+        const eyeIcon = document.getElementById('eyeIcon');
+        toggleBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.getAttribute('type') === 'password';
+            passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+            eyeIcon.className = isPassword ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+        });
+
+        function showAlert(msg) {
+            const box = document.getElementById('alertBox');
+            const txt = document.getElementById('alertMessage');
+            txt.textContent = msg;
+            box.classList.remove('hidden');
+        }
+
+        function hideAlert() {
+            document.getElementById('alertBox').classList.add('hidden');
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('expired')) {
+            showAlert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        }
+
+        // Handle Login
+        const form = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlert();
+
+            const name = document.getElementById('nameInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+
+            if (!name || !password) {
+                showAlert('Vui lòng nhập tên đăng nhập và mật khẩu.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            btnText.textContent = 'Đang xác thực...';
+            btnSpinner.classList.remove('hidden');
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    showAlert(data.message || 'Đăng nhập không thành công.');
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'Đăng Nhập';
+                    btnSpinner.classList.add('hidden');
+                    return;
+                }
+
+                const loginData = data.data;
+                Auth.setSession(loginData.token, {
+                    id: loginData.id,
+                    name: loginData.name,
+                    username: loginData.name,
+                    role: loginData.role
+                });
+
+                showToast('Đăng nhập thành công! Đang chuyển hướng...', 'success');
+
+                const roleStr = String(loginData.role || '').toUpperCase();
+                setTimeout(() => {
+                    if (roleStr === 'ROLE_ADMIN' || roleStr === 'ADMIN') {
+                        window.location.href = '/admin.html';
+                    } else {
+                        window.location.href = '/user.html';
+                    }
+                }, 400);
+
+            } catch (err) {
+                showAlert('Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại.');
+                submitBtn.disabled = false;
+                btnText.textContent = 'Đăng Nhập';
+                btnSpinner.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

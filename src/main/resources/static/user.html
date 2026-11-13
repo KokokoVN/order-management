@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Người Dùng - Quản Lý Đơn Hàng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/js/auth.js"></script>
+    <style>
+        /* Custom sleek scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col antialiased selection:bg-sky-500 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-800/90 border-b border-slate-700/80 sticky top-0 z-30 backdrop-blur-md shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-sky-600/20">
+                    <i class="fa-solid fa-cart-shopping text-base"></i>
+                </div>
+                <div>
+                    <h1 class="text-base font-bold text-white leading-tight flex items-center gap-2">
+                        <span>Cổng Đơn Hàng</span>
+                        <span class="px-2 py-0.5 text-[10px] rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 font-mono font-medium">User Portal</span>
+                    </h1>
+                    <span class="text-xs text-slate-400 hidden sm:inline">Quản lý và theo dõi tiến độ các đơn hàng</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 sm:gap-4">
+                <div class="flex items-center gap-2.5 bg-slate-900/60 border border-slate-700/80 px-3 py-1.5 rounded-xl shadow-inner">
+                    <div class="w-7 h-7 rounded-lg bg-sky-600 text-white flex items-center justify-center font-bold text-xs uppercase shadow">
+                        <span id="navAvatarLetter">U</span>
+                    </div>
+                    <div class="text-left text-xs">
+                        <span class="font-semibold text-white block leading-tight" id="navName">user</span>
+                        <span class="text-sky-400 font-mono text-[10px]">ROLE_USER</span>
+                    </div>
+                </div>
+
+                <button onclick="Auth.logout()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-semibold transition active:scale-95" title="Đăng xuất khỏi hệ thống">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span class="hidden sm:inline">Đăng xuất</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Welcome Banner & Quick Action -->
+        <div class="bg-gradient-to-r from-sky-950 via-slate-800 to-indigo-950 border border-sky-900/50 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-sky-600/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="relative z-10 space-y-1.5">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/20 text-xs font-semibold mb-1">
+                    <i class="fa-solid fa-sparkles text-sky-400"></i> Hệ thống tiếp nhận đơn hàng tự động
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                    <span>Xin chào, </span><span id="welcomeUserName" class="text-sky-400">user</span>! 👋
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
+                    Tạo đơn hàng nhanh chóng với các link sản phẩm, mã đơn sinh tự động và áp dụng giá trị mã chung cho toàn bộ đơn hàng.
+                </p>
+            </div>
+
+            <div class="relative z-10 flex flex-wrap items-center gap-3">
+                <button onclick="openCreateOrderModal()" class="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-sky-600/30 transition transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95">
+                    <i class="fa-solid fa-plus text-base"></i>
+                    <span>Tạo Đơn Hàng Mới</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Metric Statistics Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Tổng đơn</span>
+                    <i class="fa-solid fa-clipboard-list text-sky-400"></i>
+                </div>
+                <div class="text-2xl font-black text-white" id="statTotalOrders">0</div>
+                <span class="text-[11px] text-slate-400 mt-1 block">Tất cả các đơn đã tạo</span>
+            </div>
+
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center justify-between text-amber-400 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Đã tạo</span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                </div>
+                <div class="text-2xl font-black text-amber-400" id="statDaTao">0</div>
+                <span class="text-[11px] text-slate-400 mt-1 block">Chờ xử lý gửi hàng</span>
+            </div>
+
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center justify-between text-sky-400 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Đã đặt</span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+                </div>
+                <div class="text-2xl font-black text-sky-400" id="statDaDat">0</div>
+                <span class="text-[11px] text-slate-400 mt-1 block">Đang vận chuyển</span>
+            </div>
+
+            <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center justify-between text-emerald-400 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Đã nhận hàng</span>
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                </div>
+                <div class="text-2xl font-black text-emerald-400" id="statDaNhan">0</div>
+                <span class="text-[11px] text-slate-400 mt-1 block">Hoàn tất thành công</span>
+            </div>
+
+            <div class="col-span-2 lg:col-span-1 bg-slate-800/80 border border-slate-700/80 rounded-2xl p-4 shadow-lg backdrop-blur-sm">
+                <div class="flex items-center justify-between text-purple-400 mb-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Tổng số link</span>
+                    <i class="fa-solid fa-link text-purple-400"></i>
+                </div>
+                <div class="text-2xl font-black text-purple-300" id="statTotalLinks">0</div>
+                <span class="text-[11px] text-slate-400 mt-1 block" id="statTotalQty">0 sản phẩm</span>
+            </div>
+        </div>
+
+        <!-- Orders Table Card with Search & Filters -->
+        <div class="bg-slate-800/80 border border-slate-700/80 rounded-3xl shadow-xl overflow-hidden backdrop-blur-sm">
+            
+            <!-- Table Header Toolbar -->
+            <div class="p-5 border-b border-slate-700/70 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
+                            <i class="fa-solid fa-boxes-stacked text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white flex items-center gap-2">
+                                <span>Danh Sách Đơn Hàng Của Bạn</span>
+                                <span id="myOrderCountBadge" class="px-2.5 py-0.5 rounded-full bg-slate-700 text-slate-300 text-xs font-semibold">0</span>
+                            </h3>
+                        </div>
+                    </div>
+
+                    <!-- Search Input & Refresh -->
+                    <div class="flex items-center gap-2.5">
+                        <div class="relative w-full sm:w-64">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none text-xs">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </span>
+                            <input id="userOrderSearchInput" type="text" placeholder="Tìm theo mã đơn, link..."
+                                   class="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 transition">
+                        </div>
+                        <button onclick="loadMyOrders()" class="p-2.5 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-slate-300 transition" title="Làm mới dữ liệu">
+                            <i id="refreshIcon" class="fa-solid fa-arrows-rotate text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Filter Pills -->
+                <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-700/50">
+                    <button onclick="setStatusFilter('all')" id="filter-all" class="filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition bg-sky-600 text-white shadow">
+                        Tất cả (<span id="filterCountAll">0</span>)
+                    </button>
+                    <button onclick="setStatusFilter('da_tao')" id="filter-da_tao" class="filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white bg-slate-900/60 border border-slate-700/60">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 inline-block mr-1"></span>
+                        Đã tạo (<span id="filterCountDaTao">0</span>)
+                    </button>
+                    <button onclick="setStatusFilter('da_dat')" id="filter-da_dat" class="filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white bg-slate-900/60 border border-slate-700/60">
+                        <span class="w-2 h-2 rounded-full bg-sky-400 inline-block mr-1"></span>
+                        Đã đặt (<span id="filterCountDaDat">0</span>)
+                    </button>
+                    <button onclick="setStatusFilter('da_nhan_hang')" id="filter-da_nhan_hang" class="filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white bg-slate-900/60 border border-slate-700/60">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-1"></span>
+                        Đã nhận hàng (<span id="filterCountDaNhan">0</span>)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="bg-slate-900/80 text-slate-400 text-xs uppercase font-semibold border-b border-slate-700/60">
+                        <tr>
+                            <th class="px-5 py-3.5">Mã Đơn Hàng</th>
+                            <th class="px-5 py-3.5">Giá Trị Mã</th>
+                            <th class="px-5 py-3.5">Ngày Tạo</th>
+                            <th class="px-5 py-3.5">Ngày Gửi</th>
+                            <th class="px-5 py-3.5">Trạng Thái</th>
+                            <th class="px-5 py-3.5 text-center">Số Link / SL</th>
+                            <th class="px-5 py-3.5 text-right">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myOrdersTableBody" class="divide-y divide-slate-700/50">
+                        <tr><td colspan="7" class="px-6 py-12 text-center text-slate-500">Đang tải danh sách đơn hàng...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ============================================================== -->
+    <!-- MODAL: TẠO ĐƠN HÀNG MỚI                                        -->
+    <!-- ============================================================== -->
+    <div id="createOrderModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700/90 rounded-3xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800/90">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-cart-plus text-base"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <span>Tạo Đơn Hàng Mới</span>
+                        </h3>
+                        <p class="text-xs text-slate-400">Mã đơn tự động • Giá trị mã áp dụng chung cho toàn bộ đơn hàng</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('createOrderModal')" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-700/60 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form id="createOrderForm" class="flex-1 overflow-y-auto p-6 space-y-5">
+                
+                <!-- Notice if No Code Values Created Yet -->
+                <div id="noCodeValueWarning" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-3">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400 text-base mt-0.5 flex-shrink-0"></i>
+                    <div>
+                        <div class="font-bold text-amber-200">Hệ thống chưa có Giá Trị Mã nào!</div>
+                        <div class="text-amber-300/90 mt-0.5">Quản trị viên (Admin) chưa tạo Giá Trị Mã nào trong hệ thống. Vui lòng liên hệ Admin để tạo Giá Trị Mã trước khi đặt đơn hàng.</div>
+                    </div>
+                </div>
+
+                <!-- Order Header Settings (Auto Code & Code Value for Entire Order) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-700/70">
+                    <!-- Order Code: Automatic -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                            Mã đơn hàng
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <span class="w-full px-3.5 py-2.5 bg-slate-800/90 border border-slate-700 rounded-xl text-xs font-mono text-sky-400 font-bold flex items-center justify-between shadow-inner">
+                                <span id="displayAutoOrderCode">Hệ thống tự động sinh (DHxxxxxx)</span>
+                                <i class="fa-solid fa-wand-magic-sparkles text-sky-400 text-xs"></i>
+                            </span>
+                        </div>
+                        <span class="text-[11px] text-slate-500 mt-1 block">Mã đơn hàng duy nhất tự động cấp khi bấm Tạo Đơn.</span>
+                    </div>
+
+                    <!-- Code Value: For ENTIRE order -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5" for="selectOrderCodeValue">
+                            Giá trị mã cho cả đơn hàng <span class="text-rose-400">*</span>
+                        </label>
+                        <select id="selectOrderCodeValue" required
+                                class="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-sky-500 transition">
+                            <!-- Populated dynamically with availableCodes -->
+                        </select>
+                        <span class="text-[11px] text-slate-500 mt-1 block">Áp dụng một lần cho tất cả link sản phẩm trong đơn này.</span>
+                    </div>
+                </div>
+
+                <!-- Products Table in Order -->
+                <div class="space-y-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300">
+                            Danh Sách Link Sản Phẩm Thuộc Đơn Hàng <span class="text-rose-400">*</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="openBulkPasteModal()" class="px-3 py-1.5 bg-slate-700/60 hover:bg-slate-700 text-slate-300 border border-slate-600 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-paste text-[11px] text-sky-400"></i> Dán nhiều link
+                            </button>
+                            <button type="button" onclick="addProductRow()" class="px-3.5 py-1.5 bg-sky-600/20 hover:bg-sky-600/30 text-sky-300 border border-sky-500/30 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus text-[10px]"></i> Thêm Dòng Link
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="border border-slate-700 rounded-2xl overflow-hidden shadow-inner">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900/90 text-slate-400 uppercase font-semibold">
+                                <tr>
+                                    <th class="px-3 py-2.5 w-10 text-center">STT</th>
+                                    <th class="px-3 py-2.5">Link Sản Phẩm (TikTok, Shopee,...) *</th>
+                                    <th class="px-3 py-2.5 w-44">Phân Loại (Variant)</th>
+                                    <th class="px-3 py-2.5 w-24 text-center">Số Lượng *</th>
+                                    <th class="px-3 py-2.5 w-12 text-center">Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productRowsContainer" class="divide-y divide-slate-700/60 bg-slate-900/40">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Row summary footer -->
+                    <div class="flex items-center justify-between px-2 text-xs text-slate-400">
+                        <span id="modalRowSummary">Tổng cộng: 1 link | 1 sản phẩm</span>
+                        <span class="text-[11px] text-slate-500">Bấm biểu tượng 🔗 trên dòng để thử mở link</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pt-4 border-t border-slate-700 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeModal('createOrderModal')" class="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition">
+                        Hủy
+                    </button>
+                    <button type="submit" id="submitOrderBtn" class="px-6 py-2.5 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-sky-600/30 flex items-center gap-2 transition active:scale-95">
+                        <span id="submitOrderBtnText">Xác Nhận Tạo Đơn Hàng</span>
+                        <i id="submitOrderSpinner" class="fa-solid fa-circle-notch fa-spin hidden"></i>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- MODAL: DÁN NHIỀU LINK CÙNG LÚC (BULK PASTE)                     -->
+    <!-- ============================================================== -->
+    <div id="bulkPasteModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl max-w-lg w-full p-6 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-paste text-sky-400"></i>
+                    <span>Dán Nhiều Link Sản Phẩm</span>
+                </h3>
+                <button onclick="closeModal('bulkPasteModal')" class="text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-400">
+                Dán danh sách các link sản phẩm vào ô dưới đây (mỗi link nằm trên 1 dòng). Hệ thống sẽ tự động thêm từng link vào bảng đơn hàng.
+            </p>
+            <textarea id="bulkPasteInput" rows="6" placeholder="https://www.tiktok.com/...&#10;https://www.tiktok.com/...&#10;https://shopee.vn/..."
+                      class="w-full p-3 bg-slate-900 border border-slate-700 rounded-2xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono"></textarea>
+            
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onclick="closeModal('bulkPasteModal')" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold">
+                    Đóng
+                </button>
+                <button type="button" onclick="applyBulkPaste()" class="px-5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-semibold shadow">
+                    Thêm Vào Đơn
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- MODAL: XEM CHI TIẾT ĐƠN HÀNG                                   -->
+    <!-- ============================================================== -->
+    <div id="userOrderDetailModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-800/90">
+                <div>
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <span id="userModalOrderCodeTitle">Chi Tiết Đơn Hàng</span>
+                        <button type="button" id="btnCopyOrderCodeModal" onclick="copyCurrentOrderCode()" title="Sao chép mã đơn" class="p-1 text-slate-400 hover:text-sky-400 transition">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </h3>
+                    <span class="text-xs text-slate-400" id="userModalOrderSubtitle"></span>
+                </div>
+                <button onclick="closeModal('userOrderDetailModal')" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-slate-700/60 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4 overflow-y-auto flex-1">
+                
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-slate-400 font-semibold uppercase tracking-wider">Danh sách sản phẩm trong đơn</span>
+                    <button type="button" onclick="copyAllOrderLinks()" class="px-3 py-1.5 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-sky-300 border border-sky-500/20 text-xs font-semibold transition flex items-center gap-1.5">
+                        <i class="fa-regular fa-copy"></i> Sao chép tất cả link
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto border border-slate-700 rounded-2xl">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-900/80 text-slate-400 uppercase font-semibold">
+                            <tr>
+                                <th class="px-4 py-3">Link Sản Phẩm</th>
+                                <th class="px-4 py-3 w-36">Phân Loại</th>
+                                <th class="px-4 py-3 w-20 text-center">Số Lượng</th>
+                                <th class="px-4 py-3 w-28 text-center">Giá Trị Mã</th>
+                                <th class="px-4 py-3 w-16 text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userModalOrderItemsBody" class="divide-y divide-slate-700/50 bg-slate-900/40"></tbody>
+                    </table>
+                </div>
+
+                <div class="pt-3 border-t border-slate-700 flex justify-end">
+                    <button onclick="closeModal('userOrderDetailModal')" class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        if (!Auth.requireAuth()) {}
+
+        const currentUser = Auth.getUser() || {};
+        const userNameDisplay = currentUser.name || currentUser.username || 'user';
+        document.getElementById('navName').textContent = userNameDisplay;
+        document.getElementById('welcomeUserName').textContent = userNameDisplay;
+        document.getElementById('navAvatarLetter').textContent = (userNameDisplay.charAt(0) || 'U').toUpperCase();
+
+        let availableCodes = [];
+        let myOrders = [];
+        let currentFilterStatus = 'all';
+        let currentViewingOrder = null;
+
+        // Load available code values from API
+        async function loadCodeValues() {
+            try {
+                const res = await Auth.fetch('/api/user/code-values');
+                const result = await res.json();
+                if (result.success && Array.isArray(result.data)) {
+                    availableCodes = result.data;
+                    updateOrderCodeSelect();
+                }
+            } catch (e) {
+                console.error("Lỗi khi tải mã:", e);
+            }
+        }
+
+        function updateOrderCodeSelect() {
+            const selectEl = document.getElementById('selectOrderCodeValue');
+            const warningEl = document.getElementById('noCodeValueWarning');
+            const submitBtn = document.getElementById('submitOrderBtn');
+
+            if (!selectEl) return;
+
+            if (availableCodes.length > 0) {
+                selectEl.disabled = false;
+                if (warningEl) warningEl.classList.add('hidden');
+                if (submitBtn) submitBtn.disabled = false;
+
+                selectEl.innerHTML = availableCodes.map(c => 
+                    `<option value="${c.id}">${escapeHtml(c.codeValue)}</option>`
+                ).join('');
+            } else {
+                selectEl.disabled = true;
+                if (warningEl) warningEl.classList.remove('hidden');
+                if (submitBtn) submitBtn.disabled = true;
+
+                selectEl.innerHTML = '<option value="">(Chưa có mã trong hệ thống)</option>';
+            }
+        }
+
+        // Load user's orders
+        async function loadMyOrders() {
+            const refreshIcon = document.getElementById('refreshIcon');
+            if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+            const tbody = document.getElementById('myOrdersTableBody');
+            try {
+                const res = await Auth.fetch('/api/user/orders');
+                const result = await res.json();
+                if (result.success) {
+                    myOrders = result.data || [];
+                    updateStats(myOrders);
+                    applyFilterAndRender();
+                }
+            } catch (err) {
+                showToast('Lỗi khi tải đơn hàng của bạn', 'error');
+            } finally {
+                if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+            }
+        }
+
+        // Update statistics cards
+        function updateStats(orders) {
+            const total = orders.length;
+            const daTao = orders.filter(o => o.status === 'da_tao').length;
+            const daDat = orders.filter(o => o.status === 'da_dat').length;
+            const daNhan = orders.filter(o => o.status === 'da_nhan_hang').length;
+
+            let totalLinks = 0;
+            let totalQty = 0;
+            orders.forEach(o => {
+                totalLinks += (o.itemCount || (o.items ? o.items.length : 0));
+                totalQty += (o.totalQuantity || 0);
+            });
+
+            document.getElementById('statTotalOrders').textContent = total;
+            document.getElementById('statDaTao').textContent = daTao;
+            document.getElementById('statDaDat').textContent = daDat;
+            document.getElementById('statDaNhan').textContent = daNhan;
+            document.getElementById('statTotalLinks').textContent = totalLinks;
+            document.getElementById('statTotalQty').textContent = `${totalQty} sản phẩm`;
+
+            document.getElementById('filterCountAll').textContent = total;
+            document.getElementById('filterCountDaTao').textContent = daTao;
+            document.getElementById('filterCountDaDat').textContent = daDat;
+            document.getElementById('filterCountDaNhan').textContent = daNhan;
+        }
+
+        // Set status filter pill
+        function setStatusFilter(status) {
+            currentFilterStatus = status;
+
+            document.querySelectorAll('.filter-pill').forEach(btn => {
+                btn.className = 'filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition text-slate-400 hover:text-white bg-slate-900/60 border border-slate-700/60';
+            });
+
+            const activeBtn = document.getElementById(`filter-${status}`);
+            if (activeBtn) {
+                activeBtn.className = 'filter-pill px-3 py-1.5 rounded-xl text-xs font-semibold transition bg-sky-600 text-white shadow';
+            }
+
+            applyFilterAndRender();
+        }
+
+        // Search and filter dispatcher
+        function applyFilterAndRender() {
+            const query = (document.getElementById('userOrderSearchInput').value || '').toLowerCase().trim();
+
+            let filtered = myOrders.slice();
+
+            if (currentFilterStatus !== 'all') {
+                filtered = filtered.filter(o => o.status === currentFilterStatus);
+            }
+
+            if (query) {
+                filtered = filtered.filter(o => {
+                    const matchCode = o.orderCode && o.orderCode.toLowerCase().includes(query);
+                    const matchItem = o.items && o.items.some(it => 
+                        (it.productName && it.productName.toLowerCase().includes(query)) ||
+                        (it.variant && it.variant.toLowerCase().includes(query)) ||
+                        (it.codeValue && it.codeValue.toLowerCase().includes(query))
+                    );
+                    return matchCode || matchItem;
+                });
+            }
+
+            renderMyOrders(filtered);
+        }
+
+        document.getElementById('userOrderSearchInput').addEventListener('input', applyFilterAndRender);
+
+        // Render orders table
+        function renderMyOrders(orders) {
+            document.getElementById('myOrderCountBadge').textContent = orders.length;
+            const tbody = document.getElementById('myOrdersTableBody');
+            
+            if (orders.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-slate-500">
+                            <i class="fa-solid fa-box-open text-3xl mb-2 text-slate-600 block"></i>
+                            <span>Không tìm thấy đơn hàng nào phù hợp.</span>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const statusColors = {
+                da_tao: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+                da_dat: 'bg-sky-500/10 text-sky-400 border border-sky-500/20',
+                da_nhan_hang: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+            };
+
+            const statusDots = {
+                da_tao: '<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse mr-1.5"></span>',
+                da_dat: '<span class="w-1.5 h-1.5 rounded-full bg-sky-400 mr-1.5"></span>',
+                da_nhan_hang: '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>'
+            };
+
+            tbody.innerHTML = orders.map(o => {
+                const orderCodeVal = (o.items && o.items.length > 0 && o.items[0].codeValue) 
+                    ? o.items[0].codeValue 
+                    : '--';
+
+                return `
+                <tr class="hover:bg-slate-800/60 transition group">
+                    <td class="px-5 py-3.5 font-mono font-bold text-sky-400 whitespace-nowrap">
+                        <div class="flex items-center gap-1.5">
+                            <span>${escapeHtml(o.orderCode)}</span>
+                            <button onclick="copyToClipboard('${escapeHtml(o.orderCode)}', 'Đã sao chép mã ${escapeHtml(o.orderCode)}!')" title="Sao chép mã đơn" class="text-slate-500 hover:text-sky-300 opacity-60 group-hover:opacity-100 transition p-1">
+                                <i class="fa-regular fa-copy text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="px-5 py-3.5 whitespace-nowrap">
+                        <span class="px-2.5 py-1 rounded-xl bg-purple-500/15 text-purple-300 font-mono text-xs font-bold border border-purple-500/30">
+                            ${escapeHtml(orderCodeVal)}
+                        </span>
+                    </td>
+                    <td class="px-5 py-3.5 text-xs text-slate-300 whitespace-nowrap">${formatDateTime(o.createdAt)}</td>
+                    <td class="px-5 py-3.5 text-xs text-slate-400 whitespace-nowrap">${o.sentAt ? formatDateTime(o.sentAt) : '<span class="italic text-slate-500">Chưa gửi</span>'}</td>
+                    <td class="px-5 py-3.5 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${statusColors[o.status] || ''}">
+                            ${statusDots[o.status] || ''}
+                            ${escapeHtml(o.statusLabel || o.status)}
+                        </span>
+                    </td>
+                    <td class="px-5 py-3.5 text-center text-xs font-semibold text-slate-200 whitespace-nowrap">
+                        ${o.itemCount} link <span class="text-slate-400">(${o.totalQuantity} chiếc)</span>
+                    </td>
+                    <td class="px-5 py-3.5 text-right whitespace-nowrap">
+                        <button onclick="viewMyOrderDetail(${o.id})" title="Xem chi tiết" class="p-1.5 px-3 rounded-xl bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 border border-sky-500/30 text-xs font-semibold mr-1 transition">
+                            <i class="fa-solid fa-eye mr-1"></i> Chi tiết
+                        </button>
+                        ${o.status === 'da_tao' ? `
+                            <button onclick="cancelMyOrder(${o.id}, '${escapeHtml(o.orderCode)}')" title="Hủy đơn hàng" class="p-1.5 px-3 rounded-xl bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/30 text-xs font-semibold transition">
+                                <i class="fa-solid fa-trash-can mr-1"></i> Hủy
+                            </button>
+                        ` : ''}
+                    </td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        async function viewMyOrderDetail(id) {
+            try {
+                const res = await Auth.fetch(`/api/user/orders/${id}`);
+                const result = await res.json();
+                if (result.success) {
+                    currentViewingOrder = result.data;
+                    const order = currentViewingOrder;
+                    document.getElementById('userModalOrderCodeTitle').textContent = `Đơn hàng: ${order.orderCode}`;
+                    document.getElementById('userModalOrderSubtitle').textContent = `Ngày tạo: ${formatDateTime(order.createdAt)} • Trạng thái: ${order.statusLabel}`;
+
+                    const tbody = document.getElementById('userModalOrderItemsBody');
+                    tbody.innerHTML = order.items.map(it => `
+                        <tr class="hover:bg-slate-900/60 transition">
+                            <td class="px-4 py-3 font-medium text-white break-all max-w-sm">
+                                <div class="flex items-start gap-2">
+                                    <div class="flex-1">
+                                        ${it.productName.startsWith('http') 
+                                            ? `<a href="${escapeHtml(it.productName)}" target="_blank" rel="noopener" class="text-sky-400 hover:underline flex items-start gap-1.5 group">
+                                                 <i class="fa-solid fa-arrow-up-right-from-square text-[11px] mt-0.5 text-sky-500 group-hover:scale-110 transition flex-shrink-0"></i>
+                                                 <span class="break-all">${escapeHtml(it.productName)}</span>
+                                               </a>`
+                                            : escapeHtml(it.productName)
+                                        }
+                                    </div>
+                                    <button onclick="copyToClipboard('${escapeHtml(it.productName)}', 'Đã sao chép link sản phẩm!')" title="Sao chép link" class="p-1 text-slate-400 hover:text-white transition flex-shrink-0">
+                                        <i class="fa-regular fa-copy text-xs"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-slate-300 font-medium">${it.variant ? escapeHtml(it.variant) : '<span class="text-slate-500">Mặc định</span>'}</td>
+                            <td class="px-4 py-3 text-center font-bold text-sky-400 text-sm">${it.quantity}</td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="px-2.5 py-0.5 rounded-lg bg-purple-500/20 text-purple-300 font-mono text-[11px] font-bold border border-purple-500/30">
+                                    ${escapeHtml(it.codeValue || '')}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                ${it.productName.startsWith('http') ? `
+                                    <a href="${escapeHtml(it.productName)}" target="_blank" rel="noopener" title="Mở link xem thử" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 inline-block transition">
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                    </a>
+                                ` : '--'}
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    openModal('userOrderDetailModal');
+                }
+            } catch (err) {
+                showToast('Không thể tải chi tiết đơn hàng', 'error');
+            }
+        }
+
+        function copyCurrentOrderCode() {
+            if (currentViewingOrder && currentViewingOrder.orderCode) {
+                copyToClipboard(currentViewingOrder.orderCode, `Đã sao chép mã ${currentViewingOrder.orderCode}!`);
+            }
+        }
+
+        function copyAllOrderLinks() {
+            if (!currentViewingOrder || !currentViewingOrder.items || currentViewingOrder.items.length === 0) {
+                showToast('Không có link nào để sao chép', 'warning');
+                return;
+            }
+            const formatted = currentViewingOrder.items.map((it, idx) => 
+                `${idx + 1}. ${it.productName} ${it.variant ? '(' + it.variant + ')' : ''} [SL: ${it.quantity}]`
+            ).join('\n');
+            copyToClipboard(formatted, `Đã sao chép ${currentViewingOrder.items.length} link vào bộ nhớ tạm!`);
+        }
+
+        async function cancelMyOrder(id, code) {
+            const confirmed = await ConfirmModal.show({
+                title: 'Hủy đơn hàng',
+                message: `Bạn có chắc chắn muốn hủy đơn hàng '${code}'? Hành động này sẽ xóa đơn và không thể hoàn tác.`,
+                confirmText: 'Đồng ý hủy',
+                cancelText: 'Giữ lại',
+                isDanger: true
+            });
+
+            if (!confirmed) return;
+
+            try {
+                const res = await Auth.fetch(`/api/user/orders/${id}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (result.success) {
+                    showToast(result.message || 'Đã hủy đơn hàng thành công!', 'success');
+                    loadMyOrders();
+                } else {
+                    showToast(result.message || 'Hủy đơn thất bại', 'error');
+                }
+            } catch (err) {
+                showToast('Lỗi khi hủy đơn hàng', 'error');
+            }
+        }
+
+        // ==========================================
+        // CREATE ORDER LOGIC
+        // ==========================================
+        async function openCreateOrderModal() {
+            document.getElementById('createOrderForm').reset();
+            
+            // Ensure availableCodes are loaded
+            if (!availableCodes || availableCodes.length === 0) {
+                await loadCodeValues();
+            } else {
+                updateOrderCodeSelect();
+            }
+
+            const container = document.getElementById('productRowsContainer');
+            container.innerHTML = '';
+            
+            // Add 1 completely BLANK row (không điền sẵn bất cứ thứ gì)
+            addProductRow('', '', 1);
+
+            openModal('createOrderModal');
+        }
+
+        // Add blank row
+        function addProductRow(defName = '', defVariant = '', defQty = 1) {
+            const container = document.getElementById('productRowsContainer');
+            const row = document.createElement('tr');
+            row.className = 'product-row hover:bg-slate-900/60 transition';
+
+            const rowIndex = container.children.length + 1;
+
+            row.innerHTML = `
+                <td class="p-2 text-center text-slate-500 font-mono text-xs row-index">${rowIndex}</td>
+                <td class="p-2">
+                    <div class="relative flex items-center">
+                        <input type="text" class="item-name w-full pl-3 pr-8 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500 transition" 
+                               required placeholder="Dán link sản phẩm (ví dụ: https://www.tiktok.com/...)" value="${escapeHtml(defName)}" oninput="updateRowSummary()">
+                        <button type="button" onclick="testRowLink(this)" title="Thử mở link" class="absolute right-2 text-slate-400 hover:text-sky-400 p-1 transition">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </button>
+                    </div>
+                </td>
+                <td class="p-2">
+                    <input type="text" class="item-variant w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500 transition" 
+                           placeholder="Phân loại (vd: 4GB/128GB)" value="${escapeHtml(defVariant)}">
+                </td>
+                <td class="p-2">
+                    <input type="number" min="1" class="item-qty w-full px-2 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white text-center font-bold focus:outline-none focus:ring-1 focus:ring-sky-500 transition" 
+                           required value="${defQty}" oninput="updateRowSummary()">
+                </td>
+                <td class="p-2 text-center">
+                    <button type="button" onclick="removeProductRow(this)" class="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition" title="Xóa dòng này">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                </td>
+            `;
+
+            container.appendChild(row);
+            reindexRows();
+            updateRowSummary();
+        }
+
+        function testRowLink(btn) {
+            const row = btn.closest('tr');
+            const link = row.querySelector('.item-name').value.trim();
+            if (!link) {
+                showToast('Chưa nhập link để kiểm tra!', 'warning');
+                return;
+            }
+            const url = link.startsWith('http') ? link : 'https://' + link;
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+
+        function reindexRows() {
+            const container = document.getElementById('productRowsContainer');
+            Array.from(container.children).forEach((tr, idx) => {
+                const idxEl = tr.querySelector('.row-index');
+                if (idxEl) idxEl.textContent = idx + 1;
+            });
+        }
+
+        function updateRowSummary() {
+            const rowEls = document.querySelectorAll('.product-row');
+            let totalQty = 0;
+            let validLinks = 0;
+            rowEls.forEach(r => {
+                const name = r.querySelector('.item-name').value.trim();
+                const qty = parseInt(r.querySelector('.item-qty').value, 10) || 0;
+                if (name) validLinks++;
+                totalQty += qty;
+            });
+            const summaryEl = document.getElementById('modalRowSummary');
+            if (summaryEl) {
+                summaryEl.textContent = `Tổng cộng: ${validLinks || rowEls.length} link | ${totalQty} sản phẩm`;
+            }
+        }
+
+        function removeProductRow(btn) {
+            const container = document.getElementById('productRowsContainer');
+            if (container.children.length <= 1) {
+                showToast('Đơn hàng cần có ít nhất 1 link sản phẩm!', 'warning');
+                return;
+            }
+            btn.closest('tr').remove();
+            reindexRows();
+            updateRowSummary();
+        }
+
+        // Bulk Paste Modal Logic
+        function openBulkPasteModal() {
+            document.getElementById('bulkPasteInput').value = '';
+            openModal('bulkPasteModal');
+        }
+
+        function applyBulkPaste() {
+            const raw = document.getElementById('bulkPasteInput').value.trim();
+            if (!raw) {
+                showToast('Vui lòng dán danh sách link!', 'warning');
+                return;
+            }
+            const lines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (lines.length === 0) {
+                showToast('Không tìm thấy link nào hợp lệ!', 'warning');
+                return;
+            }
+
+            const container = document.getElementById('productRowsContainer');
+            // If the first row is totally blank, clear it first
+            if (container.children.length === 1) {
+                const firstRowName = container.children[0].querySelector('.item-name').value.trim();
+                if (!firstRowName) {
+                    container.innerHTML = '';
+                }
+            }
+
+            lines.forEach(link => {
+                addProductRow(link, '', 1);
+            });
+
+            closeModal('bulkPasteModal');
+            showToast(`Đã thêm nhanh ${lines.length} dòng link vào đơn!`, 'success');
+        }
+
+        // Submit Create Order
+        document.getElementById('createOrderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Get order-level code value
+            const codeValSelect = document.getElementById('selectOrderCodeValue');
+            const orderCodeValueId = parseInt(codeValSelect.value, 10);
+
+            if (!orderCodeValueId || isNaN(orderCodeValueId)) {
+                showToast('Vui lòng chọn giá trị mã cho đơn hàng! Nếu chưa có mã, hãy nhờ Admin tạo mã trước.', 'warning');
+                return;
+            }
+
+            const rowEls = document.querySelectorAll('.product-row');
+            const items = [];
+            for (const r of rowEls) {
+                const productName = r.querySelector('.item-name').value.trim();
+                const variant = r.querySelector('.item-variant').value.trim();
+                const qtyVal = r.querySelector('.item-qty').value;
+                const quantity = parseInt(qtyVal, 10);
+
+                // Bỏ qua dòng trống nếu người dùng thêm nhiều dòng mà không điền
+                if (!productName && !variant && rowEls.length > 1) {
+                    continue;
+                }
+
+                if (!productName) {
+                    showToast('Vui lòng điền link sản phẩm!', 'warning');
+                    return;
+                }
+                if (isNaN(quantity) || quantity <= 0) {
+                    showToast('Số lượng sản phẩm phải là số nguyên lớn hơn 0!', 'warning');
+                    return;
+                }
+
+                items.push({ 
+                    productName, 
+                    variant: variant || null, 
+                    quantity,
+                    codeValueId: orderCodeValueId // Kế thừa giá trị mã của cả đơn hàng
+                });
+            }
+
+            if (items.length === 0) {
+                showToast('Vui lòng thêm ít nhất 1 link sản phẩm!', 'warning');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitOrderBtn');
+            const submitBtnText = document.getElementById('submitOrderBtnText');
+            const spinner = document.getElementById('submitOrderSpinner');
+
+            submitBtn.disabled = true;
+            submitBtnText.textContent = 'Đang xử lý tạo đơn...';
+            spinner.classList.remove('hidden');
+
+            try {
+                // orderCode is omitted so backend auto-generates it!
+                const res = await Auth.fetch('/api/user/orders', {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        codeValueId: orderCodeValueId,
+                        items 
+                    })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    showToast(`Tạo đơn hàng '${result.data.orderCode}' thành công!`, 'success');
+                    closeModal('createOrderModal');
+                    loadMyOrders();
+                } else {
+                    showToast(result.message || 'Tạo đơn hàng thất bại', 'error');
+                }
+            } catch (err) {
+                showToast(err.message || 'Lỗi kết nối máy chủ', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtnText.textContent = 'Xác Nhận Tạo Đơn Hàng';
+                spinner.classList.add('hidden');
+            }
+        });
+
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('hidden');
+            el.classList.add('flex');
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.classList.add('hidden');
+            el.classList.remove('flex');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        // Init page
+        (async function init() {
+            await loadCodeValues();
+            await loadMyOrders();
+        })();
+    </script>
+</body>
+</html>

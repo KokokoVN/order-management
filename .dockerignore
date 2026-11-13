@@ -1,0 +1,7 @@
+target/
+data/
+.git/
+.gitignore
+.vscode/
+*.bat
+README.md
