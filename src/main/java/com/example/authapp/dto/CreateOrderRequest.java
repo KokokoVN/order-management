@@ -13,6 +13,9 @@ public class CreateOrderRequest {
     // Giá trị mã chung cho cả đơn hàng
     private Long codeValueId;
 
+    // Địa chỉ đơn hàng (dc đơn hàng)
+    private String address;
+
     @NotEmpty(message = "Đơn hàng phải có ít nhất 1 sản phẩm")
     @Valid
     private List<OrderDetailRequest> items = new ArrayList<>();
@@ -33,6 +36,14 @@ public class CreateOrderRequest {
 
     public void setCodeValueId(Long codeValueId) {
         this.codeValueId = codeValueId;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public List<OrderDetailRequest> getItems() {

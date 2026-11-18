@@ -5,7 +5,9 @@ import com.example.authapp.entity.OrderStatus;
 import com.example.authapp.service.OrderService;
 import com.example.authapp.service.UserService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -156,6 +158,24 @@ public class AdminController {
             return ResponseEntity.ok(ApiResponse.ok("Xóa đơn hàng thành công!"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/orders/export")
+    public ResponseEntity<byte[]> exportOrders(
+            @RequestParam(required = false) OrderStatus status,
+            @AuthenticationPrincipal UserDetails adminDetails) {
+        try {
+            byte[] excelData = orderService.exportOrdersToExcel(status, adminDetails != null ? adminDetails.getUsername() : null, true);
+            String statusSuffix = status != null ? status.name() : "tat_ca";
+            String filename = "quan_ly_don_hang_" + statusSuffix + ".xlsx";
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .body(excelData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

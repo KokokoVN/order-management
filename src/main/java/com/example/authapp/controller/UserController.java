@@ -1,11 +1,14 @@
 package com.example.authapp.controller;
 
 import com.example.authapp.dto.*;
+import com.example.authapp.entity.OrderStatus;
 import com.example.authapp.service.OrderService;
 import com.example.authapp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -134,6 +137,28 @@ public class UserController {
         } catch (Exception e) {
             log.error("Lỗi khi hủy đơn hàng: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/orders/export")
+    public ResponseEntity<byte[]> exportOrders(
+            @RequestParam(required = false) OrderStatus status,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        try {
+            byte[] excelData = orderService.exportOrdersToExcel(status, userDetails.getUsername(), false);
+            String statusSuffix = status != null ? status.name() : "tat_ca";
+            String filename = "don_hang_" + statusSuffix + ".xlsx";
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .body(excelData);
+        } catch (Exception e) {
+            log.error("Lỗi khi xuất file Excel đơn hàng: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

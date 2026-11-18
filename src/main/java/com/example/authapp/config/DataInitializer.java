@@ -50,6 +50,16 @@ public class DataInitializer implements CommandLineRunner {
         } catch (Exception e) {
             log.debug("Notice on variant alter: {}", e.getMessage());
         }
+
+        // Tự động thêm cột địa chỉ đơn hàng (address) nếu chưa có
+        try {
+            jdbcTemplate.execute("ALTER TABLE orders ADD COLUMN IF NOT EXISTS address VARCHAR(1000)");
+            log.info(">>> Đã kiểm tra/thêm cột orders.address");
+        } catch (Exception e) {
+            try {
+                jdbcTemplate.execute("ALTER TABLE orders ADD COLUMN address VARCHAR(1000)");
+            } catch (Exception ignored) {}
+        }
         // 1. Seed Users
 
         // 1. Khởi tạo tài khoản hệ thống (admin / user) nếu chưa có

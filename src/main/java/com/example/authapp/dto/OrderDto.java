@@ -17,6 +17,7 @@ public class OrderDto {
     private LocalDateTime sentAt;
     private OrderStatus status;
     private String statusLabel;
+    private String address;
     private int totalQuantity;
     private int itemCount;
     private List<OrderDetailDto> items = new ArrayList<>();
@@ -35,6 +36,7 @@ public class OrderDto {
         dto.setSentAt(order.getSentAt());
         dto.setStatus(order.getStatus());
         dto.setStatusLabel(order.getStatus() != null ? order.getStatus().getLabel() : "");
+        dto.setAddress(order.getAddress());
 
         if (order.getOrderDetails() != null) {
             dto.setItems(order.getOrderDetails().stream()
@@ -110,6 +112,14 @@ public class OrderDto {
 
     public void setStatusLabel(String statusLabel) {
         this.statusLabel = statusLabel;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public int getTotalQuantity() {

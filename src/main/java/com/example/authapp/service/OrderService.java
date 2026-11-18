@@ -6,10 +6,16 @@ import com.example.authapp.repository.CodeValueRepository;
 import com.example.authapp.repository.OrderDetailRepository;
 import com.example.authapp.repository.OrderRepository;
 import com.example.authapp.repository.UserRepository;
+import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -133,6 +139,9 @@ public class OrderService {
         Order order = new Order(user, orderCode);
         order.setStatus(OrderStatus.da_tao);
         order.setCreatedAt(LocalDateTime.now());
+        if (request.getAddress() != null && !request.getAddress().trim().isEmpty()) {
+            order.setAddress(request.getAddress().trim());
+        }
 
         Long orderLevelCodeValueId = request.getCodeValueId();
 
@@ -196,6 +205,212 @@ public class OrderService {
 
         // Rule: "khi xóa đơn hàng, các dòng chi tiết của đơn đó được xóa theo"
         orderRepository.delete(order);
+    }
+
+    // ==========================================
+    // XUẤT EXCEL DANH SÁCH & CHI TIẾT ĐƠN HÀNG
+    // ==========================================
+    public byte[] exportOrdersToExcel(OrderStatus statusFilter, String username, boolean isAdmin) throws IOException {
+        List<Order> orders;
+        if (isAdmin) {
+            orders = orderRepository.findAllByOrderByCreatedAtDesc();
+        } else {
+            User user = userRepository.findByName(username)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng: " + username));
+            orders = orderRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+        }
+
+        if (statusFilter != null) {
+            orders = orders.stream()
+                    .filter(o -> o.getStatus() == statusFilter)
+                    .collect(Collectors.toList());
+        }
+
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("Danh sách đơn hàng");
+
+            // Fonts
+            Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerFont.setColor(IndexedColors.WHITE.getIndex());
+            headerFont.setFontHeightInPoints((short) 11);
+
+            Font regularFont = workbook.createFont();
+            regularFont.setFontHeightInPoints((short) 10);
+
+            Font linkFont = workbook.createFont();
+            linkFont.setUnderline(Font.U_SINGLE);
+            linkFont.setColor(IndexedColors.BLUE.getIndex());
+            linkFont.setFontHeightInPoints((short) 10);
+
+            // Styles
+            CellStyle headerStyle = workbook.createCellStyle();
+            headerStyle.setFont(headerFont);
+            headerStyle.setFillForegroundColor(IndexedColors.ROYAL_BLUE.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
+            headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            headerStyle.setBorderTop(BorderStyle.THIN);
+            headerStyle.setBorderBottom(BorderStyle.THIN);
+            headerStyle.setBorderLeft(BorderStyle.THIN);
+            headerStyle.setBorderRight(BorderStyle.THIN);
+            headerStyle.setWrapText(true);
+
+            CellStyle textStyle = workbook.createCellStyle();
+            textStyle.setFont(regularFont);
+            textStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+            textStyle.setBorderTop(BorderStyle.THIN);
+            textStyle.setBorderBottom(BorderStyle.THIN);
+            textStyle.setBorderLeft(BorderStyle.THIN);
+            textStyle.setBorderRight(BorderStyle.THIN);
+
+            CellStyle centerStyle = workbook.createCellStyle();
+            centerStyle.cloneStyleFrom(textStyle);
+            centerStyle.setAlignment(HorizontalAlignment.CENTER);
+
+            CellStyle linkStyle = workbook.createCellStyle();
+            linkStyle.cloneStyleFrom(textStyle);
+            linkStyle.setFont(linkFont);
+
+            // Status styles
+            CellStyle statusTaoStyle = workbook.createCellStyle();
+            statusTaoStyle.cloneStyleFrom(centerStyle);
+            statusTaoStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+            statusTaoStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+            CellStyle statusDatStyle = workbook.createCellStyle();
+            statusDatStyle.cloneStyleFrom(centerStyle);
+            statusDatStyle.setFillForegroundColor(IndexedColors.LIGHT_TURQUOISE.getIndex());
+            statusDatStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+            CellStyle statusNhanStyle = workbook.createCellStyle();
+            statusNhanStyle.cloneStyleFrom(centerStyle);
+            statusNhanStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+            statusNhanStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+            // Headers
+            String[] headers = {
+                    "STT",
+                    "Mã Đơn Hàng",
+                    "Người Tạo",
+                    "Địa Chỉ Đơn Hàng",
+                    "Trạng Thái",
+                    "Ngày Tạo",
+                    "Ngày Gửi / Đặt",
+                    "STT Sản Phẩm",
+                    "Link Sản Phẩm",
+                    "Phân Loại (Variant)",
+                    "Số Lượng",
+                    "Giá Trị Mã"
+            };
+
+            Row headerRow = sheet.createRow(0);
+            headerRow.setHeightInPoints(28);
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+            }
+
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+            CreationHelper createHelper = workbook.getCreationHelper();
+
+            int rowIndex = 1;
+            int orderStt = 1;
+
+            for (Order order : orders) {
+                List<OrderDetail> details = order.getOrderDetails();
+                String orderCode = order.getOrderCode();
+                String creator = order.getUser() != null ? order.getUser().getName() : "";
+                String address = order.getAddress() != null ? order.getAddress() : "";
+                String statusStr = order.getStatus() != null ? order.getStatus().getLabel() : "";
+                String createdStr = order.getCreatedAt() != null ? order.getCreatedAt().format(dtf) : "";
+                String sentStr = order.getSentAt() != null ? order.getSentAt().format(dtf) : "-";
+
+                CellStyle currentStatusStyle = centerStyle;
+                if (order.getStatus() == OrderStatus.da_tao) {
+                    currentStatusStyle = statusTaoStyle;
+                } else if (order.getStatus() == OrderStatus.da_dat) {
+                    currentStatusStyle = statusDatStyle;
+                } else if (order.getStatus() == OrderStatus.da_nhan_hang) {
+                    currentStatusStyle = statusNhanStyle;
+                }
+
+                if (details == null || details.isEmpty()) {
+                    Row row = sheet.createRow(rowIndex++);
+                    row.setHeightInPoints(20);
+
+                    Cell c0 = row.createCell(0); c0.setCellValue(orderStt); c0.setCellStyle(centerStyle);
+                    Cell c1 = row.createCell(1); c1.setCellValue(orderCode); c1.setCellStyle(centerStyle);
+                    Cell c2 = row.createCell(2); c2.setCellValue(creator); c2.setCellStyle(textStyle);
+                    Cell c3 = row.createCell(3); c3.setCellValue(address); c3.setCellStyle(textStyle);
+                    Cell c4 = row.createCell(4); c4.setCellValue(statusStr); c4.setCellStyle(currentStatusStyle);
+                    Cell c5 = row.createCell(5); c5.setCellValue(createdStr); c5.setCellStyle(centerStyle);
+                    Cell c6 = row.createCell(6); c6.setCellValue(sentStr); c6.setCellStyle(centerStyle);
+
+                    Cell c7 = row.createCell(7); c7.setCellValue("-"); c7.setCellStyle(centerStyle);
+                    Cell c8 = row.createCell(8); c8.setCellValue("-"); c8.setCellStyle(textStyle);
+                    Cell c9 = row.createCell(9); c9.setCellValue("-"); c9.setCellStyle(textStyle);
+                    Cell c10 = row.createCell(10); c10.setCellValue(0); c10.setCellStyle(centerStyle);
+                    Cell c11 = row.createCell(11); c11.setCellValue("-"); c11.setCellStyle(centerStyle);
+                } else {
+                    int itemIndex = 1;
+                    for (OrderDetail item : details) {
+                        Row row = sheet.createRow(rowIndex++);
+                        row.setHeightInPoints(20);
+
+                        Cell c0 = row.createCell(0); c0.setCellValue(orderStt); c0.setCellStyle(centerStyle);
+                        Cell c1 = row.createCell(1); c1.setCellValue(orderCode); c1.setCellStyle(centerStyle);
+                        Cell c2 = row.createCell(2); c2.setCellValue(creator); c2.setCellStyle(textStyle);
+                        Cell c3 = row.createCell(3); c3.setCellValue(address); c3.setCellStyle(textStyle);
+                        Cell c4 = row.createCell(4); c4.setCellValue(statusStr); c4.setCellStyle(currentStatusStyle);
+                        Cell c5 = row.createCell(5); c5.setCellValue(createdStr); c5.setCellStyle(centerStyle);
+                        Cell c6 = row.createCell(6); c6.setCellValue(sentStr); c6.setCellStyle(centerStyle);
+
+                        Cell c7 = row.createCell(7); c7.setCellValue(itemIndex++); c7.setCellStyle(centerStyle);
+
+                        String pName = item.getProductName() != null ? item.getProductName() : "";
+                        Cell c8 = row.createCell(8);
+                        if (pName.startsWith("http://") || pName.startsWith("https://")) {
+                            c8.setCellValue(pName);
+                            try {
+                                Hyperlink link = createHelper.createHyperlink(HyperlinkType.URL);
+                                link.setAddress(pName);
+                                c8.setHyperlink(link);
+                            } catch (Exception ignored) {}
+                            c8.setCellStyle(linkStyle);
+                        } else {
+                            c8.setCellValue(pName);
+                            c8.setCellStyle(textStyle);
+                        }
+
+                        Cell c9 = row.createCell(9);
+                        c9.setCellValue(item.getVariant() != null ? item.getVariant() : "");
+                        c9.setCellStyle(textStyle);
+
+                        Cell c10 = row.createCell(10);
+                        c10.setCellValue(item.getQuantity() != null ? item.getQuantity() : 1);
+                        c10.setCellStyle(centerStyle);
+
+                        Cell c11 = row.createCell(11);
+                        c11.setCellValue(item.getCodeValue() != null ? item.getCodeValue().getCodeValue() : "");
+                        c11.setCellStyle(centerStyle);
+                    }
+                }
+                orderStt++;
+            }
+
+            // Adjust column widths
+            for (int i = 0; i < headers.length; i++) {
+                sheet.autoSizeColumn(i);
+                int width = sheet.getColumnWidth(i);
+                if (width < 12 * 256) sheet.setColumnWidth(i, 12 * 256);
+                if (width > 60 * 256) sheet.setColumnWidth(i, 60 * 256);
+            }
+
+            workbook.write(out);
+            return out.toByteArray();
+        }
     }
 }
 

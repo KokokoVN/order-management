@@ -142,15 +142,19 @@
                             </h3>
                         </div>
 
-                        <!-- Search & Refresh -->
+                        <!-- Search, Export & Refresh -->
                         <div class="flex items-center gap-2 w-full sm:w-auto">
                             <div class="relative flex-1 sm:w-64">
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 pointer-events-none text-xs">
                                     <i class="fa-solid fa-magnifying-glass"></i>
                                 </span>
-                                <input id="orderSearchInput" type="text" placeholder="Tìm mã đơn, người tạo, link..."
+                                <input id="orderSearchInput" type="text" placeholder="Tìm mã đơn, người tạo, link, địa chỉ..."
                                        class="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
                             </div>
+                            <button onclick="openAdminExportModal()" class="px-3 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition flex items-center gap-1.5 flex-shrink-0" title="Xuất file Excel đơn hàng">
+                                <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                                <span class="hidden sm:inline">Xuất Excel</span>
+                            </button>
                             <button onclick="loadOrders()" class="p-2 sm:p-2.5 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-slate-300 transition flex-shrink-0" title="Làm mới">
                                 <i id="adminRefreshIcon" class="fa-solid fa-arrows-rotate text-xs"></i>
                             </button>
@@ -183,6 +187,7 @@
                         <thead class="bg-slate-900/80 text-slate-400 text-xs uppercase font-semibold border-b border-slate-700/60">
                             <tr>
                                 <th class="px-5 py-3.5">Mã Đơn</th>
+                                <th class="px-5 py-3.5">Địa Chỉ Đơn</th>
                                 <th class="px-5 py-3.5">Giá Trị Mã</th>
                                 <th class="px-5 py-3.5">Người Tạo</th>
                                 <th class="px-5 py-3.5">Ngày Tạo</th>
@@ -193,7 +198,7 @@
                             </tr>
                         </thead>
                         <tbody id="ordersTableBody" class="divide-y divide-slate-700/50">
-                            <tr><td colspan="8" class="px-6 py-12 text-center text-slate-500">Đang tải danh sách đơn hàng...</td></tr>
+                            <tr><td colspan="9" class="px-6 py-12 text-center text-slate-500">Đang tải danh sách đơn hàng...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -328,6 +333,12 @@
             </div>
             
             <div class="p-4 sm:p-6 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
+                <!-- Order Address Box -->
+                <div id="adminModalAddressContainer" class="hidden bg-slate-900/60 p-3 rounded-xl border border-slate-700/60 text-xs text-slate-300">
+                    <span class="text-slate-400 font-semibold block text-[11px] mb-0.5"><i class="fa-solid fa-location-dot text-indigo-400 mr-1"></i> Địa chỉ đơn hàng:</span>
+                    <span id="adminModalAddressText" class="text-white font-medium break-words"></span>
+                </div>
+
                 <!-- Action bar in details -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                     <span class="text-slate-400 font-semibold uppercase tracking-wider text-[11px]">Danh sách link sản phẩm</span>
@@ -517,6 +528,48 @@
         </div>
     </div>
 
+    <!-- ============================================================== -->
+    <!-- MODAL 5: XUẤT FILE EXCEL ĐƠN HÀNG (ADMIN)                      -->
+    <!-- ============================================================== -->
+    <div id="adminExportModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl sm:rounded-3xl shadow-2xl max-w-md w-full p-5 sm:p-6 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+                <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                    <span>Tải Danh Sách Đơn Hàng (Excel)</span>
+                </h3>
+                <button onclick="closeModal('adminExportModal')" class="text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    Hệ thống sẽ tạo 1 file Excel (.xlsx) chứa đầy đủ đơn hàng của tất cả người dùng: Mã đơn, Người tạo, Địa chỉ đơn hàng, Giá trị mã, Ngày tạo, Ngày gửi, Trạng thái, và từng dòng sản phẩm chi tiết (link, phân loại, số lượng).
+                </p>
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5">
+                        Chọn trạng thái đơn hàng cần tải
+                    </label>
+                    <select id="adminExportStatusSelect" class="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-semibold">
+                        <option value="all">📁 Tất cả trạng thái (Toàn bộ đơn hàng)</option>
+                        <option value="da_tao">⏳ Chưa đặt (Trạng thái: Đã tạo)</option>
+                        <option value="da_dat">🚚 Đã đặt (Trạng thái: Đang vận chuyển)</option>
+                        <option value="da_nhan_hang"> Đã nhận hàng (Trạng thái: Hoàn tất)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-700/60">
+                <button type="button" onclick="closeModal('adminExportModal')" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition">
+                    Hủy
+                </button>
+                <button type="button" id="btnAdminDownloadExcel" onclick="triggerAdminDownloadExcel()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition active:scale-95">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Tải File Ngay (.xlsx)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         if (!Auth.requireAdmin()) {}
 
@@ -631,13 +684,14 @@
             if (query) {
                 filtered = filtered.filter(o => {
                     const matchCode = o.orderCode && o.orderCode.toLowerCase().includes(query);
+                    const matchAddress = o.address && o.address.toLowerCase().includes(query);
                     const matchUser = o.userName && o.userName.toLowerCase().includes(query);
                     const matchItem = o.items && o.items.some(it => 
                         (it.productName && it.productName.toLowerCase().includes(query)) ||
                         (it.variant && it.variant.toLowerCase().includes(query)) ||
                         (it.codeValue && it.codeValue.toLowerCase().includes(query))
                     );
-                    return matchCode || matchUser || matchItem;
+                    return matchCode || matchAddress || matchUser || matchItem;
                 });
             }
 
@@ -658,7 +712,7 @@
                         <span>Không tìm thấy đơn hàng nào phù hợp.</span>
                     </div>
                 `;
-                tbody.innerHTML = `<tr><td colspan="8">${emptyHtml}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9">${emptyHtml}</td></tr>`;
                 mobileContainer.innerHTML = emptyHtml;
                 return;
             }
@@ -690,6 +744,9 @@
                                 <i class="fa-regular fa-copy text-xs"></i>
                             </button>
                         </div>
+                    </td>
+                    <td class="px-5 py-3.5 text-xs text-slate-300 max-w-xs truncate" title="${escapeHtml(o.address || 'Không có')}">
+                        ${o.address ? `<div class="flex items-center gap-1.5"><i class="fa-solid fa-location-dot text-indigo-400 text-[10px] flex-shrink-0"></i><span class="truncate">${escapeHtml(o.address)}</span></div>` : '<span class="text-slate-500 italic">--</span>'}
                     </td>
                     <td class="px-5 py-3.5 whitespace-nowrap">
                         <span class="px-2.5 py-1 rounded-xl bg-purple-500/15 text-purple-300 font-mono text-xs font-bold border border-purple-500/30">
@@ -749,6 +806,13 @@
                         </span>
                     </div>
 
+                    ${o.address ? `
+                        <div class="text-xs text-slate-300 bg-slate-900/60 px-2.5 py-1.5 rounded-xl border border-slate-700/60 flex items-start gap-1.5">
+                            <i class="fa-solid fa-location-dot text-indigo-400 text-xs mt-0.5 flex-shrink-0"></i>
+                            <span class="break-words font-medium">${escapeHtml(o.address)}</span>
+                        </div>
+                    ` : ''}
+
                     <div class="grid grid-cols-2 gap-2 text-xs text-slate-300 bg-slate-900/50 p-2.5 rounded-xl border border-slate-700/60">
                         <div>
                             <span class="text-slate-500 text-[10px] block uppercase font-semibold">Người tạo</span>
@@ -791,6 +855,16 @@
                     const order = currentViewingAdminOrder;
                     document.getElementById('modalOrderCodeTitle').textContent = `Đơn: ${order.orderCode}`;
                     document.getElementById('modalOrderSubtitle').textContent = `Người tạo: ${order.userName} • ${order.statusLabel}`;
+
+                    // Address display in Admin Details
+                    const addrContainer = document.getElementById('adminModalAddressContainer');
+                    const addrText = document.getElementById('adminModalAddressText');
+                    if (order.address && order.address.trim()) {
+                        addrText.textContent = order.address.trim();
+                        addrContainer.classList.remove('hidden');
+                    } else {
+                        addrContainer.classList.add('hidden');
+                    }
 
                     // Desktop Table
                     const tbody = document.getElementById('modalOrderItemsBody');
@@ -1226,6 +1300,54 @@
                 }
             } catch (err) {
                 showToast('Lỗi máy chủ khi xóa tài khoản', 'error');
+            }
+        }
+
+        // ==========================================
+        // ADMIN EXCEL EXPORT LOGIC
+        // ==========================================
+        function openAdminExportModal() {
+            openModal('adminExportModal');
+        }
+
+        async function triggerAdminDownloadExcel() {
+            const selectEl = document.getElementById('adminExportStatusSelect');
+            const status = selectEl ? selectEl.value : 'all';
+            const btn = document.getElementById('btnAdminDownloadExcel');
+            const originalContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Đang tải file...';
+
+            try {
+                let url = '/api/admin/orders/export';
+                if (status && status !== 'all') {
+                    url += '?status=' + encodeURIComponent(status);
+                }
+                const res = await Auth.fetch(url);
+                if (!res.ok) throw new Error('Không thể tải file excel: ' + res.statusText);
+                const blob = await res.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                const statusNames = {
+                    all: 'tat_ca',
+                    da_tao: 'chua_dat',
+                    da_dat: 'da_dat',
+                    da_nhan_hang: 'da_nhan_hang'
+                };
+                const suffix = statusNames[status] || status;
+                a.download = `quan_ly_don_hang_${suffix}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(downloadUrl);
+                showToast('Tải danh sách đơn hàng thành công!', 'success');
+                closeModal('adminExportModal');
+            } catch (err) {
+                showToast(err.message || 'Lỗi khi tải file', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
             }
         }
 

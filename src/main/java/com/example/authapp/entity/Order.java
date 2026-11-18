@@ -32,6 +32,10 @@ public class Order {
     @Column(nullable = false, length = 30)
     private OrderStatus status = OrderStatus.da_tao;
 
+    // Địa chỉ đơn hàng (dc đơn hàng)
+    @Column(name = "address", length = 1000)
+    private String address;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<OrderDetail> orderDetails = new ArrayList<>();
@@ -102,6 +106,14 @@ public class Order {
 
     public void setStatus(OrderStatus status) {
         this.status = status;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public List<OrderDetail> getOrderDetails() {

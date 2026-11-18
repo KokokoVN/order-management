@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     order_code VARCHAR(100) NOT NULL UNIQUE,
+    address VARCHAR(1000) NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     sent_at DATETIME NULL,
     status ENUM('da_tao', 'da_dat', 'da_nhan_hang') NOT NULL DEFAULT 'da_tao',
